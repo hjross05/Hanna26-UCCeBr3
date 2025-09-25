@@ -66,6 +66,15 @@ void CeBr3_Array::Construct()
 						 assemblyPos, &assemblyRot,
 						 detID);
 	detID++;
+      } else if(type.contains("3x3")){
+	if(detector_3x3 == NULL){
+	  detector_3x3 = new CeBr3_3x3_Detector(expHall_log, materials);
+	  detector_3x3->Construct();
+	}
+	detector_3x3->GetAssembly()->MakeImprint(expHall_log,
+						 assemblyPos, &assemblyRot,
+						 detID);
+	detID++;
       } else if(type.contains("3x4")){
 	if(detector_3x4 == NULL){
 	  detector_3x4 = new CeBr3_3x4_Detector(expHall_log, materials);
@@ -118,6 +127,12 @@ void CeBr3_Array::Construct()
       detector_2x2->GetAssembly()->MakeImprint(expHall_log,
 					       assemblyPos, &assemblyRot,
 					       detID);
+    } else if(detectorType.contains("3x3")){
+      detector_3x3 = new CeBr3_3x3_Detector(expHall_log, materials);
+      detector_3x3->Construct();
+      detector_3x3->GetAssembly()->MakeImprint(expHall_log,
+					       assemblyPos, &assemblyRot,
+					       detID);
     } else if(detectorType.contains("3x4")){
       detector_3x4 = new CeBr3_3x4_Detector(expHall_log, materials);
       detector_3x4->Construct();
@@ -143,6 +158,9 @@ void CeBr3_Array::MakeSensitive(TrackerGammaSD* TG){
   if(detector_2x2 != NULL)
     detector_2x2->MakeSensitive(TG);
   
+  if(detector_3x3 != NULL)
+    detector_3x3->MakeSensitive(TG);
+
   if(detector_3x4 != NULL)
     detector_3x4->MakeSensitive(TG);
 

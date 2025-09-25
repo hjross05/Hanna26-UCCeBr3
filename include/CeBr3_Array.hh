@@ -4,6 +4,7 @@
 //#include "DetectorConstruction.hh"
 //#include "G4RunManager.hh"
 #include "CeBr3_2x2_Detector.hh"
+#include "CeBr3_3x3_Detector.hh"
 #include "CeBr3_3x4_Detector.hh"
 #include "CeBr3_3x6_Detector.hh"
 #include "Cradle.hh"
@@ -37,6 +38,7 @@ private:
   Materials *materials;
 
   CeBr3_2x2_Detector* detector_2x2;
+  CeBr3_3x3_Detector* detector_3x3;
   CeBr3_3x4_Detector* detector_3x4;
   CeBr3_3x6_Detector* detector_3x6;
   Cradle* cradle;

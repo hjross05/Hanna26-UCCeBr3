@@ -47,8 +47,8 @@ void Lead_Brick::Construct()
 //---------------------------------------------------------------------
 void Lead_Brick::PlaceBrick()
 {
-    // If there is a Target geometry file, use it for placement;
-  // if not, use the current Pos and Rot to place a single Target.
+  // If there is a brick geometry file, use it for placement;
+  // if not, use the current Pos and Rot to place a single brick.
   if(geoFileName != ""){
     geoFile.open(geoFileName.c_str());
     if (!geoFile.is_open())

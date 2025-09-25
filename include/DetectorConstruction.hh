@@ -13,8 +13,8 @@
 #include "Lead_Brick_Messenger.hh"
 #include "Lab_Bench.hh"
 #include "Lab_Bench_Messenger.hh"
-#include "Target.hh"
-#include "Target_Messenger.hh"
+#include "Target_Chamber.hh"
+#include "Target_Chamber_Messenger.hh"
 #include "Source_Capsule.hh"
 #include "Source_Capsule_Messenger.hh"
 #include "Source_Cradle.hh"
@@ -47,7 +47,7 @@ private:
   Lead_Brick* brick;
   Lab_Bench* bench;
   Cradle* cradle;
-  Target* target;
+  Target_Chamber* chamber;
 
   // Logical volumes
   G4LogicalVolume* ExpHall_log;
@@ -64,7 +64,7 @@ private:
   Lead_Brick_Messenger* brick_Messenger;
   Lab_Bench_Messenger* bench_Messenger;
   Cradle_Messenger* cradle_Messenger;
-  Target_Messenger* target_Messenger;
+  Target_Chamber_Messenger* chamber_Messenger;
 
   Materials* materials;
 };
