@@ -16,6 +16,7 @@ CeBr3_Array::CeBr3_Array(G4LogicalVolume* experimentalHall_log,
   assemblyPos.setZ(20*cm);
 
   detector_2x2 = NULL;
+  detector_3x3 = NULL;
   detector_3x4 = NULL;
   detector_3x6 = NULL;
 
