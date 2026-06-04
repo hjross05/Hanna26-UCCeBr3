@@ -10,7 +10,7 @@ Beam_Pipe::Beam_Pipe(G4LogicalVolume* experimentalHall_log, Materials* mat)
   
   Pos.setX(0);
   Pos.setY(0);
-  Pos.setZ(20.574*cm);
+  Pos.setZ(-36.322*cm);
 
   Rot = G4RotationMatrix::IDENTITY;
   

@@ -8,6 +8,7 @@
 #include "CeBr3_3x4_Detector.hh"
 #include "CeBr3_3x6_Detector.hh"
 #include "Cradle.hh"
+#include "Beam_Pipe.hh"
 #include "TrackerGammaSD.hh"
 
 class CeBr3_Array 
@@ -42,6 +43,7 @@ private:
   CeBr3_3x4_Detector* detector_3x4;
   CeBr3_3x6_Detector* detector_3x6;
   Cradle* cradle;
+  Beam_Pipe* pipe;
   
   G4ThreeVector assemblyPos;
   G4RotationMatrix assemblyRot;

@@ -8,6 +8,8 @@ CeBr3_Array::CeBr3_Array(G4LogicalVolume* experimentalHall_log,
   materials=mat;
   expHall_log=experimentalHall_log;
 
+  pipe = new Beam_Pipe(expHall_log, materials);
+
   assemblyRot = G4RotationMatrix::IDENTITY;
   assemblyRot.rotateX(-90.*deg);
 
@@ -152,6 +154,10 @@ void CeBr3_Array::Construct()
 	exit (EXIT_FAILURE);
     }
   }
+
+  if (pipe != NULL) {
+          pipe->Construct();
+      }
 }
 //---------------------------------------------------------------------
 void CeBr3_Array::MakeSensitive(TrackerGammaSD* TG){
