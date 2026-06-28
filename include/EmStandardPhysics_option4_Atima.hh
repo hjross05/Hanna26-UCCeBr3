@@ -23,58 +23,47 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm7/src/PhysicsListMessenger.cc
-/// \brief Implementation of the PhysicsListMessenger class
 //
 //
+//---------------------------------------------------------------------------
+//
+// ClassName:   G4EmStandardPhysics_option4
+//
+// Author:      V.Ivanchenko 28.09.2012
+//
+// Modified:
+//
+//----------------------------------------------------------------------------
+//
+// This class provides construction of EM physics using the best models
+// of standard and low-energy packages and set of 
+// the most adavced options allowing precise simulation at low
+// and intermediate energies
+//
+
+#ifndef EmStandardPhysics_option4_Atima_h
+#define EmStandardPhysics_option4_Atima_h 1
+
+#include "G4VPhysicsConstructor.hh"
+#include "globals.hh"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-#include "PhysicsListMessenger.hh"
-
-#include "PhysicsList.hh"
-#include "G4UIdirectory.hh"
-#include "G4UIcmdWithADoubleAndUnit.hh"
-#include "G4UIcmdWithAString.hh"
-#include "G4UIcmdWithABool.hh"
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-PhysicsListMessenger::PhysicsListMessenger(PhysicsList* phys)
- : G4UImessenger(),fPhysicsList(phys)
+class EmStandardPhysics_option4_Atima : public G4VPhysicsConstructor
 {
-  fPhysDir = new G4UIdirectory("/PhysicsList/");
-  fPhysDir->SetGuidance("physics list commands");
-   
-  fListCmd = new G4UIcmdWithAString("/PhysicsList/addPhysics",this);  
-  fListCmd->SetGuidance("Add modula physics list.");
-  fListCmd->SetParameterName("PList",false);
-  fListCmd->AvailableForStates(G4State_PreInit);
+public:
 
-  PolCmd = new G4UIcmdWithABool("/PhysicsList/SetGammaPolarization",this);
-  PolCmd->SetGuidance("Enable/disable polarized gamma-ray physics");
-  PolCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+  explicit EmStandardPhysics_option4_Atima(G4int ver=1, const G4String& name="");
 
-}
+  ~EmStandardPhysics_option4_Atima() override;
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+  void ConstructParticle() override;
+  void ConstructProcess() override;
 
-PhysicsListMessenger::~PhysicsListMessenger()
-{
-  delete fListCmd;
-  delete fPhysDir;
-  delete PolCmd;    
-}
+private:
+  G4int  verbose;
+};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PhysicsListMessenger::SetNewValue(G4UIcommand* command,
-                                          G4String newValue)
-{       
-  if( command == fListCmd )
-    { fPhysicsList->AddPhysicsList(newValue);}
-  if( command == PolCmd)
-    { fPhysicsList->SetUsePolarizedPhysics(PolCmd->GetNewBoolValue(newValue));}
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+#endif

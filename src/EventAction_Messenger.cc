@@ -10,6 +10,9 @@ EventAction_Messenger::EventAction_Messenger(EventAction* EA):theEventAction(EA)
   OutFileCmd = new G4UIcmdWithAString("/Output/Filename",this);
   OutFileCmd->SetGuidance("Output file name.");
 
+  OutDetCmd = new G4UIcmdWithoutParameter("/Output/DetectorsOnly",this);
+  OutDetCmd->SetGuidance("Only write detected gamma-ray information.");
+  
 }
 
 
@@ -20,7 +23,7 @@ EventAction_Messenger::~EventAction_Messenger()
 
   delete OutputDir;
   delete OutFileCmd;
-
+  delete OutDetCmd;
 }
 
 
@@ -30,6 +33,9 @@ void EventAction_Messenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == OutFileCmd )
     {theEventAction->SetOutFile(newValue);}
+
+  if( command == OutDetCmd )
+    {theEventAction->SetOutDetsOnly();}
 
 }
 

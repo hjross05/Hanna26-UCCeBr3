@@ -7,7 +7,7 @@ extern G4Timer Timerintern;
 EventAction::EventAction()
 { 
   gammaCollectionID=-1;
-
+  outDetsOnly = false;
   Timerintern.Start();
 }
 
@@ -99,7 +99,7 @@ void EventAction::EndOfEventAction(const G4Event* ev)
 
       G4double Edep[100] = {0};
       G4double EdepMax[100] = {0};
-      G4int    firstHit[100] = {0};
+      G4int    bigHit[100] = {0};
 
       G4int detMax = 0;
       
@@ -108,8 +108,8 @@ void EventAction::EndOfEventAction(const G4Event* ev)
 	G4double E   = (*gammaCollection)[i]->GetEdep()/keV;
 
 	if(E>EdepMax[det]) { 
-	  EdepMax[det]  = E;
-	  firstHit[det] = i;
+	  EdepMax[det] = E;
+	  bigHit[det]  = i;
 	}
 
 	Edep[det] += E;
@@ -120,50 +120,76 @@ void EventAction::EndOfEventAction(const G4Event* ev)
       }
 
       //G4cout << "**** Track Total Energy = " << (*gammaCollection)[0]->GetTotalEnergy()/keV << G4endl;
-      
+
+      // Find the number of detectors hit for the detected event header.
+      G4int NDetsHit = 0;
+      for(int det=0; det<detMax+1; det++)
+	if(Edep[det] > 0) NDetsHit++;
+      // Detected event header
+      evfile << "D" << std::setw(4) << NDetsHit
+	     << std::setw(15) << std::right << event_id
+	     << G4endl;
+
+      // Crystal detection events
       for(int det=0; det<detMax+1; det++){
 
 	if(Edep[det] > 0) {
 
 	  // Look for a full-energy event (including pileup)
-	  G4int photopeak = 0;
+	  G4int FEP = 0;
 	  for(G4int i=0; i < eventInfo->GetNEmittedGammas(); i++){
 	    if(abs(eventInfo->GetEmittedGammaEnergy(i) - Edep[det])<0.001)
-	      photopeak = 1;
+	      FEP = 1;
 	    // Look for full-energy pileup
 	    for(G4int j=i+1; j < eventInfo->GetNEmittedGammas(); j++){
 	      if(abs(eventInfo->GetEmittedGammaEnergy(i)
 		     + eventInfo->GetEmittedGammaEnergy(j)
 		     - Edep[det])<0.001)
-		photopeak = 1;
+		FEP = 1;
 	    }
 	  }
-	  eventInfo->SetFullEnergy(photopeak);
+	  eventInfo->SetFullEnergy(FEP);
 	  
 	  evfile
-	    << std::setw(15) << std::right
-	    << event_id
-	    << std::setw(5) << std::right
-	    << (*gammaCollection)[firstHit[det]]->GetDetID()
+	    << "C" << std::setw(4) << std::right
+	    << (*gammaCollection)[bigHit[det]]->GetDetID()
 	    << std::fixed << std::setprecision(2) << std::setw(10) << std::right
 	    << Edep[det]
-	    << std::setw(10) << std::right
-	    << (*gammaCollection)[firstHit[det]]->GetPos().getX()/mm
-	    << std::setw(10) << std::right
-	    << (*gammaCollection)[firstHit[det]]->GetPos().getY()/mm
-	    << std::setw(10) << std::right
-	    << (*gammaCollection)[firstHit[det]]->GetPos().getZ()/mm
-	    << std::setw(10) << std::right
-	    << photopeak
+	    << std::setw(12) << std::right
+	    << (*gammaCollection)[bigHit[det]]->GetPos().getX()/mm
+	    << std::setw(12) << std::right
+	    << (*gammaCollection)[bigHit[det]]->GetPos().getY()/mm
+	    << std::setw(12) << std::right
+	    << (*gammaCollection)[bigHit[det]]->GetPos().getZ()/mm
+	    << std::setw(12) << std::right
+	    << FEP
 	    << G4endl;
-	}
-	
+	}	
       }
-      
     }
-
   }
-
+  if(!outDetsOnly){
+    evfile << "E" << std::setw(4) << eventInfo->GetNEmittedGammas()  
+	   << std::setw(15) << std::right << event_id << G4endl;
+    for(G4int i = 0; i < eventInfo->GetNEmittedGammas(); i++){
+      evfile << "     "
+	     << std::fixed << std::setprecision(2) 
+	     << std::setw(10) << std::right
+	     << eventInfo->GetEmittedGammaEnergy(i)
+	     << std::setw(12) << std::right
+	     << eventInfo->GetEmittedGammaPosX(i)
+	     << std::setw(12) << std::right
+	     << eventInfo->GetEmittedGammaPosY(i)
+	     << std::setw(12) << std::right
+	     << eventInfo->GetEmittedGammaPosZ(i)
+	     << std::setw(12) << std::right
+	     << std::setprecision(4)
+	     << eventInfo->GetEmittedGammaPhi(i)
+	     << std::setw(12) << std::right
+	     << eventInfo->GetEmittedGammaTheta(i)
+	     << G4endl;
+    }
+  }
   G4cout.flags( f );
   
 }

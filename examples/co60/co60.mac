@@ -1,13 +1,14 @@
+#/run/printProgress 1
+#/tracking/verbose 2
 
 # Geometry =====================================================================
 /CeBr3/GeometryFile two_3x4s_at_5cm.geo
 
 # Processes ====================================================================
 
-# Produce Auger electrons and X-rays
-/process/em/auger true
-/process/had/deex/readICdata true
-/process/had/deex/setIC true
+# Gamma-ray angular correlation and polarized physics flags ====================
+/PhysicsList/AngularCorrelations true
+/PhysicsList/SetGammaPolarization false
 
 # Initialize run manager =======================================================
 /run/initialize
@@ -17,4 +18,5 @@
 /gun/ion 27 60
 
 /Output/Filename co60.out
+/Output/DetectorsOnly
 /run/beamOn 1000000

@@ -23,9 +23,10 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm7/include/PhysicsList.hh
+/// \file electromagnetic/TestEm1/include/PhysicsList.hh
 /// \brief Definition of the PhysicsList class
 //
+// $Id: PhysicsList.hh 82331 2014-06-16 09:54:40Z gcosmo $
 //
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //
@@ -38,50 +39,65 @@
 #define PhysicsList_h 1
 
 #include "G4VModularPhysicsList.hh"
+#include "G4ProcessManager.hh"
+#include "G4NuclearLevelData.hh"
 #include "globals.hh"
 
-class G4VPhysicsConstructor;
-class StepMax;
+class DetectorConstruction;
 class PhysicsListMessenger;
+class G4VPhysicsConstructor;
+class PhysicsList_Messenger;
+
+#ifdef NEUTRONS
+// From LBE for neutrons
+class G4StoppingPhysics;        // This builder encapsulate stopping processes
+#endif
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class PhysicsList: public G4VModularPhysicsList
 {
 public:
-
-  PhysicsList();
- ~PhysicsList();
+  PhysicsList(DetectorConstruction*);
+  ~PhysicsList();
 
   virtual void ConstructParticle();
-    
-  void AddPhysicsList(const G4String& name);
   virtual void ConstructProcess();
+
+#ifdef NEUTRONS
+    // From LBE for neutrons
+    virtual void ConstructHad();
+#endif
+
+  //  void AddReaction(); // Maybe include this later
+
+  void EmPhysicsList(const G4String& name);
+    
+  void AddDecay();
+  void AddRadioactiveDecay();
+  void AddStepMax();
+
+  void GetRange(G4double);
+
+  void SetGammaAngularCorrelations(bool);
 
   void SetUsePolarizedPhysics(bool);
 
-  void AddRadioactiveDecay();
-  
-  void AddStepMax();       
-  StepMax* GetStepMaxProcess() {return fStepMaxProcess;};
-
-private:
-
-  void AddIonGasModels();
-
-  G4bool   fHelIsRegisted;
-  G4bool   fBicIsRegisted;
-  G4bool   fBiciIsRegisted;
-
-  G4bool   usePolar;
-  
-  G4String                             fEmName;
-  G4VPhysicsConstructor*               fEmPhysicsList;
-  G4VPhysicsConstructor*               fDecPhysicsList;
-  std::vector<G4VPhysicsConstructor*>  fHadronPhys;    
-  StepMax*                             fStepMaxProcess;
+private:    
+  G4VPhysicsConstructor* fEmPhysicsList;
+  G4String               fEmName;
     
-  PhysicsListMessenger*  fMessenger;
+  DetectorConstruction* fDet;
+
+  PhysicsList_Messenger* theMessenger;
+  bool usePolar;
+
+#ifdef NEUTRONS
+    // From LBE for neutrons
+    G4StoppingPhysics* stoppingPhysics;
+#endif
+
+  //    PhysicsListMessenger* fMessenger;         
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

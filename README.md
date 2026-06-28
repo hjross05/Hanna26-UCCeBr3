@@ -1,8 +1,8 @@
-# UCCeBr3
+# UCCeBrA
 
 ## Compile and install
 
-Install version [4.10.07.p01 of the Geant4 libraries](https://geant4.web.cern.ch/geant4/support/download.shtml). You will need the data files for low energy electromagnetic processes, photon evaporation, and radioactive decay.
+Install version [10.7.4 of the Geant4 libraries](https://geant4.web.cern.ch/download/10.7.4.html). You will need the data files for low energy electromagnetic processes, photon evaporation, and radioactive decay.
 
 Set up your environment (consider adding this to your `.bashrc`):
 
@@ -12,6 +12,13 @@ Set up your environment (consider adding this to your `.bashrc`):
 Compile:
 
     $ make
+
+
+The executable is automatically installed in
+
+    $G4WORKDIR/bin/$G4SYSTEM
+
+(which is added to your path when you source `geant4make.sh`)
 
 ## Examples
 Run an example by typing `make` at the command line in the corresponding directory. Python 3.x is requred to run the sorting codes, and the [root data analysis framework](https://root.cern/) is needed to work with the sorted histograms.
@@ -152,21 +159,55 @@ Optionally, cylindrical aluminum targets can be included in simulations.
 
 ## Output
 
-Output is written to a text file. Each line represents a detected event and has the format:
+Output is written to a text file specified with:
 
-    <Event> <Detector ID> <Energy> <Hit X> <Hit Y> <Hit Z> <Full Energy>
+    /Output/Filename <File Name>
+
+If energy was deposited one or more detectors in an event, a detected event block is written:
+
+    D   <Number of Detectors Hit>  <Event>
+    C   <Detector ID>   <Energy>   <Hit X>   <Hit Y>   <Hit Z>   <Full Energy>
+    ...
+    C   <Detector ID>   <Energy>   <Hit X>   <Hit Y>   <Hit Z>   <Full Energy>
 
 - `<Event>` : event number
 - `<Detector ID>` : integer identifying the detector registering the event
 - `<Energy>` : energy deposited in keV
-- `<Hit X>`, `<Hit Y>`, `<Hit Z>` :  hit position in mm
-- `<Full Energy>` : == 1 if the gamma ray deposited its total energy in the detector, ==  0 otherwise
+- `<Hit X>`, `<Hit Y>`, `<Hit Z>` : position in mm of the highest-energy hit
+- `<Full Energy>` : == 1 if the gamma ray deposited its total energy in the detector (including full-energy pileup), ==  0 otherwise
+
+Gamma-ray energies, emission positions, and emission directions are written for each gamma ray emitted in every event:
+
+    E   <# of emitted gamma rays>   <Event #>
+        <Energy>   <X>   <Y>   <Z>   <phi>   <theta>
+        <Energy>   <X>   <Y>   <Z>   <phi>   <theta>
+        ...
+
+These emmitted gamma-ray blocks can be omitted from the output with:
+
+    /Output/DetectorsOnly
+
+## Electromagnetic Physics List
+
+The electromagnetic physics list can be specified with:
+
+    /PhysicsList/SelectEmPhysics <physics list name>
+
+Available electromagnetic physics lists are `emstandard_opt0`, `emstandard_opt1`, `emstandard_opt2`, `emstandard_opt3`, **`emstandard_opt4` (default)**, `emlivermore`, `empenelope`, `emstandardGS`, `emlowenergy`, `emstandardWVI`, and `emstandardSS`. They are described [in the Geant4 Physics List Guide](https://geant4-userdoc.web.cern.ch/UsersGuides/PhysicsListGuide/BackupVersions/V10.7/html/electromagnetic/index.html). In addition, `emstandard_opt4_Atima` in a modified version of `emstandard_opt4` that uses ATIMA stopping powers for beam particles.
+
+## Gamma-Ray Angular Correlations (see also /examples/sources/co60)
+
+Gamma-ray angular correlations are built into the `G4PhotonEvaporation/G4GammaTransition` classes (starting with geant4.10.4). This functionality is disabled by default but can be enabled with:
+
+    /PhysicsList/AngularCorrelations true
+
+The `./examples/sources/co60` example simulates the angular correlations in the 4 -> 2 -> 0 cascade in <SUP>60</SUP>Ni.
 
 ## Visualization
 
 Run the macro file `vis/vis.mac` an interactive session:
 
-    $ UCCeBr3
+    $ UCCeBrA
     
     Idle> /control/execute vis/vis.mac
     Idle> exit
