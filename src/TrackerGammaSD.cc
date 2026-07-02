@@ -17,7 +17,7 @@ TrackerGammaSD::TrackerGammaSD(G4String name)
 {
   G4String HCname;
   collectionName.insert(HCname="gammaCollection");
-  print=false; //LR (formerly not initialized)
+  print = false;
 
 }
 
@@ -29,7 +29,6 @@ TrackerGammaSD::~TrackerGammaSD(){ }
 
 void TrackerGammaSD::Initialize(G4HCofThisEvent*)
 {
-
 
   gammaCollection = new TrackerGammaHitsCollection
                           (SensitiveDetectorName,collectionName[0]); 
@@ -58,12 +57,18 @@ G4bool TrackerGammaSD::ProcessHits(G4Step* aStep,G4TouchableHistory*)
 
       newHit->SetTrackID  (aStep->GetTrack()->GetTrackID());
 
-      newHit->SetParticleID(aStep->GetTrack()->GetDefinition()->GetParticleName());
-      newHit->SetDetID    (detID); // Coming real soon now.
-      newHit->SetEdep     (edep);
+      newHit->SetParticleID (aStep->GetTrack()->GetDefinition()->GetParticleName());
+      newHit->SetDetID      (detID);
+      newHit->SetEdep       (edep);
       newHit->SetTotalEnergy(etotal);
-      newHit->SetPos      (aStep->GetPostStepPoint()->GetPosition());
+      newHit->SetPos        (aStep->GetPostStepPoint()->GetPosition());
+      newHit->SetGlobalTime (aStep->GetPostStepPoint()->GetGlobalTime());
 
+      newHit->SetIsFirst(false);
+      if((aStep->GetTrack()->GetDefinition()->GetParticleName() == "gamma")
+	 && aStep->IsFirstStepInVolume())
+	newHit->SetIsFirst(true);
+      
       gammaCollection->insert( newHit );
       newHit->Draw();
 

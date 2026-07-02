@@ -35,14 +35,17 @@ class TrackerGammaHit : public G4VHit
       void SetEdep     (G4double de)        { edep = de; };
       void SetTotalEnergy(G4double te)      { etotal = te; };
       void SetPos      (G4ThreeVector xyz)  { pos = xyz; };
-      
+      void SetGlobalTime(G4double t)        { globalTime = t; };
+      void SetIsFirst(G4bool b)             { isFirst = b; };
+
       G4int GetTrackID()       { return trackID; };
       G4String GetParticleID() { return particleID; };
       G4int  GetDetID()        { return detID; };
       G4double GetEdep()       { return edep; };
       G4double GetTotalEnergy(){ return etotal; };
       G4ThreeVector GetPos()   { return pos; };
-      
+      G4double GetGlobalTime() { return globalTime; };
+      G4bool IsFirst()         { return isFirst; };
   private:
   
       G4int         trackID;
@@ -51,6 +54,8 @@ class TrackerGammaHit : public G4VHit
       G4double      edep;
       G4double      etotal;
       G4ThreeVector pos;
+      G4double      globalTime;
+      G4bool        isFirst;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

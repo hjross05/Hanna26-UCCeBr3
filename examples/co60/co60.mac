@@ -18,5 +18,7 @@
 /gun/ion 27 60
 
 /Output/Filename co60.out
-/Output/DetectorsOnly
+#/Output/DetectorsOnly # Un-comment if you want smaller output files and
+                       # don't need information about emitted gamma rays
+
 /run/beamOn 1000000

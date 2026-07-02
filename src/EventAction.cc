@@ -93,30 +93,33 @@ void EventAction::EndOfEventAction(const G4Event* ev)
 
     TrackerGammaHitsCollection* gammaCollection = (TrackerGammaHitsCollection*)(HCE->GetHC(gammaCollectionID));
 
-    G4int Ngamma = gammaCollection->entries();
+    G4int Nhits = gammaCollection->entries();
 
-    if(Ngamma>0) {
+    if(Nhits>0) {
 
-      G4double Edep[100] = {0};
-      G4double EdepMax[100] = {0};
-      G4int    bigHit[100] = {0};
-
-      G4int detMax = 0;
+      G4double Edep[100]          = {0};
+      G4int    firstHit[100]      = {-1};
+      G4int    detMax             = 0;
       
-      for(int i=0; i<Ngamma; i++) {
+      for(G4int i=0; i<Nhits; i++) {
 	G4int    det = (*gammaCollection)[i]->GetDetID()-1;
 	G4double E   = (*gammaCollection)[i]->GetEdep()/keV;
-
-	if(E>EdepMax[det]) { 
-	  EdepMax[det] = E;
-	  bigHit[det]  = i;
-	}
-
+	
 	Edep[det] += E;
 
 	if(det > detMax)
 	  detMax = det;
 
+	// Sometimes the first hit in the crystal is not a gamma ray.
+	// We'll assume that the first hit in the crystal is the first
+	// one in the hit collection in this case.
+	if( firstHit[det] < 0 )
+	  firstHit[det] = i;
+	// If it is a gamma, TrackerGammaSD should have identified it.
+	if( (*gammaCollection)[i]->IsFirst() ){
+	  firstHit[det] = i;
+	}
+	
       }
 
       //G4cout << "**** Track Total Energy = " << (*gammaCollection)[0]->GetTotalEnergy()/keV << G4endl;
@@ -152,17 +155,20 @@ void EventAction::EndOfEventAction(const G4Event* ev)
 	  
 	  evfile
 	    << "C" << std::setw(4) << std::right
-	    << (*gammaCollection)[bigHit[det]]->GetDetID()
+	    << (*gammaCollection)[firstHit[det]]->GetDetID()
 	    << std::fixed << std::setprecision(2) << std::setw(10) << std::right
 	    << Edep[det]
 	    << std::setw(12) << std::right
-	    << (*gammaCollection)[bigHit[det]]->GetPos().getX()/mm
+	    << (*gammaCollection)[firstHit[det]]->GetPos().getX()/mm
 	    << std::setw(12) << std::right
-	    << (*gammaCollection)[bigHit[det]]->GetPos().getY()/mm
+	    << (*gammaCollection)[firstHit[det]]->GetPos().getY()/mm
 	    << std::setw(12) << std::right
-	    << (*gammaCollection)[bigHit[det]]->GetPos().getZ()/mm
-	    << std::setw(12) << std::right
+	    << (*gammaCollection)[firstHit[det]]->GetPos().getZ()/mm
+	    << std::setw(4) << std::right
 	    << FEP
+	    << std::setprecision(2) << std::setw(12) << std::right
+	    << std::scientific
+	    << (*gammaCollection)[firstHit[det]]->GetGlobalTime()
 	    << G4endl;
 	}	
       }

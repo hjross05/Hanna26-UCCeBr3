@@ -50,11 +50,16 @@ def Sort(fileName, nDet=1):
         return
     
     # Sort the output file.
+    nEvents = 0
     FEPCounts = 0
     lastEvent  = -1
     lastDet    = -1
     lastEnergy = 0
     while 1:
+        # Progress message
+        if nEvents%10000 == 0:
+            print(f'{nEvents} events processed.    \r',end='')
+            sys.stdout.flush()
         line = inFile.readline()
         if line == "":
             break
@@ -120,8 +125,10 @@ def Sort(fileName, nDet=1):
             dth = np.arccos(v1.Dot(v2)/v1.Mag()/v2.Mag())
             emitted_delta_theta.Fill(np.degrees(dth))
             emitted_theta1.Fill(np.degrees(th1))
-
-    print('{0:d} Full-energy counts'.format(FEPCounts))
+        nEvents += 1
+    
+    print(f'{nEvents} events processed.')
+    print(f'{FEPCounts} Full-energy counts')
 
     return 
 
