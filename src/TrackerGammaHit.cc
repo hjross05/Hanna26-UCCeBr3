@@ -26,6 +26,8 @@ TrackerGammaHit::TrackerGammaHit(const TrackerGammaHit& right)
   edep       = right.edep;
   etotal     = right.etotal;
   pos        = right.pos;
+  isFirst    = right.isFirst;
+  globalTime = right.globalTime;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -38,6 +40,8 @@ const TrackerGammaHit& TrackerGammaHit::operator=(const TrackerGammaHit& right)
   edep       = right.edep;
   etotal     = right.etotal;
   pos        = right.pos;
+  isFirst    = right.isFirst;
+  globalTime = right.globalTime;
   return *this;
 }
 
@@ -81,6 +85,11 @@ void TrackerGammaHit::Print()
          << pos.getY()/mm
 	 << std::setw(10) << std::right
          << pos.getZ()/mm
+	 << std::setw(4) << std::right
+	 << isFirst
+	 << std::setw(10) << std::right
+	 << std::scientific
+         << globalTime*1000.0
          << G4endl;
 
 }

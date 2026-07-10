@@ -22,7 +22,8 @@ public:
 
   void BeginOfEventAction(const G4Event*);
   void EndOfEventAction(const G4Event*);
-  void SetOutFile(G4String); 
+  void SetOutFile(G4String);
+  void SetOutDetsOnly() { outDetsOnly = true; }
   void closeEvfile();
   void openEvfile();
   const G4Event* GetEvent() { return evt; }
@@ -35,6 +36,7 @@ public:
 private:
   G4int gammaCollectionID;
   G4String outFileName;
+  G4bool   outDetsOnly;
   std::ofstream evfile;
   G4int NTotalEvents;
   G4int everyNevents;

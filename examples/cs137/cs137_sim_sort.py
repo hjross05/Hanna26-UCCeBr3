@@ -6,8 +6,8 @@ from matplotlib import pyplot as plt
 import sys
 import os
 
-# The detector resolution is simulated as the sum of two Gaussians
-sigmaPar  = 0.45    # First energy resolution parameter
+# The detector resolution is simulated as sigmaPars[det]*sqrt(E)
+sigmaPars = {0:0.5}
 
 # Histogram specifications
 eMax       = 4096
@@ -26,7 +26,8 @@ def readInputFile(fileName = "cs137_sim_sort.inp"):
 
     line     = inFile.readline()
     words    = line.split()
-    sigmaPar = float(words[0])
+    for det in range(nDet):
+        sigmaPars[det] = float(words[det])
 
     line     = inFile.readline()
     words    = line.split()
@@ -38,7 +39,7 @@ def readInputFile(fileName = "cs137_sim_sort.inp"):
 
     inFile.close()
 
-    return nDet, sigmaPar, eMax, nBins 
+    return nDet, sigmaPars, eMax, nBins 
 
 def Sort(fileName, nDet=1):
 
@@ -49,30 +50,48 @@ def Sort(fileName, nDet=1):
         return
     
     # Sort the output file.
-    photopeakCounts = 0
-    for line in inFile.readlines():
+    FEPCounts = 0
+    lastEvent  = -1
+    lastDet    = -1
+    lastEnergy = 0
+    while 1:
+        line = inFile.readline()
+        if line == "":
+            break
         words = line.split()
-        det   = int(words[1])-1
-        eSim  = float(words[2])
-
-        if int(words[6]) == 1:
-            photopeakCounts += 1
+        if words[0] == 'D':
+            NDetsHit = int(words[1])
+            event = int(words[2])
+            for i in range(NDetsHit):
+                line = inFile.readline()
+                words = line.split()
+                if words[0] == 'C':
+                    det   = int(words[1])-1
+                    eSim  = float(words[2])
+                    if int(words[6]) == 1:
+                        FEPCounts += 1
+                else:
+                    print("Error: Expecting a 'C' entry in output.")
+                    exit()
         
-        # Fold in simulated resolution.
-        sigma = sigmaPar*np.sqrt(eSim)
-        eRes = eSim + np.random.normal(scale=sigma)
-
-        # TODO: Add threshold parameters
-
-
-        histosRaw[det].Fill(eSim)
-        histos[det].Fill(eRes)
+                # Fold in simulated resolution.
         
-    print('{0:d} photopeak counts'.format(photopeakCounts))
+                sigma = sigmaPars[det]*np.sqrt(eSim)
+                eRes = eSim + np.random.normal(scale=sigma)
+
+                histosRaw[det].Fill(eSim)
+                histos[det].Fill(eRes)        
+
+        if words[0] == 'E':
+            NEmittedGammas = int(words[1])
+            for i in range(NEmittedGammas):
+                line = inFile.readline()
+
+    print('{0:d} Full-energy counts'.format(FEPCounts))
 
     return 
 
-nDet, sigmaPar, eMax, nBins = readInputFile()
+nDet, sigmaPars, eMax, nBins = readInputFile()
 
 # Create histograms
 histos = []

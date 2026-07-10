@@ -22,6 +22,8 @@
 #include "VisManager.hh"
 #endif
 
+#include "Git_Hash.hh"
+
 #include "G4Timer.hh"
 G4Timer Timer;
 G4Timer Timerintern;
@@ -31,10 +33,13 @@ int main(int argc,char** argv)
   // Construct the default run manager
   G4RunManager* runManager = new G4RunManager;
 
+  G4cout << "Executable: " << argv[0] << G4endl;
+  G4cout << "Git commit: " << GIT_HASH << G4endl;
+  G4cout << "Git branch: " << GIT_BRANCH << G4endl;
+  
   // set mandatory initialization classes
   DetectorConstruction* detector=new DetectorConstruction();
-  //  PhysicsList *physicsList = new PhysicsList(detector);
-  PhysicsList *physicsList = new PhysicsList();
+  PhysicsList *physicsList = new PhysicsList(detector);
   runManager->SetUserInitialization(detector);
   runManager->SetUserInitialization(physicsList);
 

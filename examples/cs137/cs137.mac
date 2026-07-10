@@ -4,13 +4,6 @@
 /CeBr3/setZ 20 cm
 /CeBr3/rotateX 90 deg
 
-# Processes ====================================================================
-
-# Produce Auger electrons and X-rays
-/process/em/auger true
-/process/had/deex/readICdata true
-/process/had/deex/setIC true
-
 # Initialize run manager =======================================================
 /run/initialize
 
