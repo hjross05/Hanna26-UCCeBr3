@@ -10,7 +10,7 @@ all:  $(patsubst %.mac,%.root,$(wildcard *.mac))
 
 # Pattern rule for sorting the simulation output into Root histograms
 %.root : %.out
-	/Applications/anaconda3/envs/pyroot/bin/python co60_sim_sort.py $*.out 2>&1 | tee -a $*.log
+	./co60_sim_sort.py $*.out 2>&1 | tee -a $*.log
 
 clean:
 	rm *.log *.out *.root *.wrl

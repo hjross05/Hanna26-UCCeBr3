@@ -29,11 +29,15 @@ This is a simple example collecting a spectrum with a single CeBr detector from 
 
 ### `./examples/co60`
 
-This is a simulation of a <sup>60</sup>Co source placed between two detector to demonstrate coincidence data. A sorting code `co60_sim_sort.py` is included which produces histograms in a `.root` file. A `Makefile` is included.
+This is a simulation of a <sup>60</sup>Co source placed in the CeBrA demonstrator. A sorting code `co60_sim_sort.py` is included which produces histograms in a `.root` file. A `Makefile` is included.
 
 ## Macro File Commands
 
 ### CeBr3 Detector Placement
+
+    /CeBr3/Type <2x2 | 3x3 | 3x4 | 3x6>
+
+> Set the type of CeBr3 detector to place.
 
     /CeBr3/setX <double> <unit>
     /CeBr3/setY <double> <unit>

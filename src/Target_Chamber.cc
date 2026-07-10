@@ -1,11 +1,13 @@
-/*This document includes all peices of the CeBrA array that we deemed 
-necessary to simulate as of August 2026 (except the lead bricks and the detectors
-themselves which have their own files). We have decided that the guage cross 
-that hangs over the detectors is not necessary to inlcude, but the code for
-it is still here if that changes. In order to get rid of a peice of the sim,
-just comment out its log and phys lines. Some of the peices here are rudementary
-and do not fully represent what the dead material is in real life but we have 
-determined that the level of precision here is adequate.*/
+/* H. J. Ross 7/10/2026
+   This model includes all peices of the CeBrA array that we deemed 
+   necessary to simulate as of Summer 2026. We have determined
+   that the gas handling cross connected to the target ladder
+   extension above the gate valve can safely be omitted.
+   The code for it is still here if that changes. In order to get rid
+   of a peice of the model, comment out its G4PVPlacement() call. Some
+   of the peices here are rudementary and do not fully represent what
+   the dead material is in real life but we have determined that the
+   level of precision here is adequate. */ 
 
 #include "Target_Chamber.hh"
 

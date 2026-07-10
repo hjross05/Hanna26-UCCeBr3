@@ -151,6 +151,16 @@ void CeBr3_Array::Construct()
 	      << G4endl;
 	exit (EXIT_FAILURE);
     }
+    if(detectorType.contains("Cradle") || detectorType.contains("cradle")){
+      Cradle* newCradle = new Cradle(expHall_log, materials);;
+      if(detectorType.contains("3x6"))
+	newCradle->setOffset(152*mm);
+      newCradle->Construct();
+      newCradle->GetAssembly()->MakeImprint(expHall_log,
+					    assemblyPos, &assemblyRot,
+					    cradleID);
+      cradleID++;
+    }
   }
 }
 //---------------------------------------------------------------------

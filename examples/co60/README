@@ -1,9 +1,9 @@
-co60.mac simulates a 60Co source placed between two 3"x4" CeBr3
-detectors facing each other and placed 5 cm from the source. The
-detector placement is done using a geometry file:
-two_3x4s_at_5_cm.geo.
+co60.mac simulates a 60Co source placed at the target position
+of CeBrA. The demonstrator configuration from 2024-2025 is placed
+using a geometry file: demonstrator.geo. Lead shielding bricks are
+placed with bricks.geo.
 
 The sorting code co60_sim_sort.py sorts singles spectra, with and
 without energy resolution folded in, a gamma-gamma coincidence
-matrix, and the spectrum of gamma rays collected in coincidence with
+matrix, and spectra of gamma rays collected in coincidence with
 the 1332 keV transition.

@@ -1,8 +1,11 @@
 /Source/Simple 1000 keV
 /Source/Capsule/Construct
+
 /Bench/Construct
-/CeBr3/Type 3x4
+
+/CeBr3/Type 3x4cradle
 /CeBr3/setZ 20 cm
+/CeBr3/rotateX 90 deg
 
 # Initialize run manager =======================================================
 /run/initialize

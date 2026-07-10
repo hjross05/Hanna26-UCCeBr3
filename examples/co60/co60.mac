@@ -4,6 +4,11 @@
 # Geometry =====================================================================
 /CeBr3/GeometryFile demonstrator.geo
 
+/Chamber/Construct
+
+/Brick/GeometryFile bricks.geo
+/Brick/Construct
+
 # Processes ====================================================================
 
 # Gamma-ray angular correlation and polarized physics flags ====================
