@@ -1,6 +1,6 @@
-#include "CeBr3_Array.hh"
+#include "CeBrA_Array.hh"
 
-CeBr3_Array::CeBr3_Array(G4LogicalVolume* experimentalHall_log,
+CeBrA_Array::CeBrA_Array(G4LogicalVolume* experimentalHall_log,
 			 Materials* mat, Cradle* cr)
 {
   cradle = cr;
@@ -25,12 +25,12 @@ CeBr3_Array::CeBr3_Array(G4LogicalVolume* experimentalHall_log,
   geoFileName = "";
 }
 
-CeBr3_Array::~CeBr3_Array()
+CeBrA_Array::~CeBrA_Array()
 {
 }
 
 //---------------------------------------------------------------------
-void CeBr3_Array::Construct()
+void CeBrA_Array::Construct()
 {  
   //  G4RunManager* runManager = G4RunManager::GetRunManager();
   //  DetectorConstruction* theDC = (DetectorConstruction*) runManager->GetUserDetectorConstruction();
@@ -164,7 +164,7 @@ void CeBr3_Array::Construct()
   }
 }
 //---------------------------------------------------------------------
-void CeBr3_Array::MakeSensitive(TrackerGammaSD* TG){
+void CeBrA_Array::MakeSensitive(TrackerGammaSD* TG){
 
   if(detector_2x2 != NULL)
     detector_2x2->MakeSensitive(TG);

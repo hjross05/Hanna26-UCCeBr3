@@ -5,8 +5,8 @@
 #include "Materials.hh"
 #include "Experimental_Hall.hh"
 #include "Experimental_Hall_Messenger.hh"
-#include "CeBr3_Array.hh"
-#include "CeBr3_Array_Messenger.hh"
+#include "CeBrA_Array.hh"
+#include "CeBrA_Array_Messenger.hh"
 #include "Cradle.hh"
 #include "Cradle_Messenger.hh"
 #include "Lead_Brick.hh"
@@ -40,7 +40,7 @@ public:
 
 private:
   
-  CeBr3_Array* the_CeBr3_Array;
+  CeBrA_Array* the_CeBrA_Array;
 
   Source_Capsule* capsule;
   Source_Cradle* source_cradle;
@@ -58,7 +58,7 @@ private:
   Experimental_Hall_Messenger* ExperimentalHallMessenger;
   TrackerGammaSD* TrackerGamma;
   TrackerGammaSD_Messenger* TrackerGammaSDMessenger;
-  CeBr3_Array_Messenger* the_CeBr3_Array_Messenger;
+  CeBrA_Array_Messenger* the_CeBrA_Array_Messenger;
   Source_Capsule_Messenger* capsule_Messenger;
   Source_Cradle_Messenger* source_cradle_Messenger;
   Lead_Brick_Messenger* brick_Messenger;

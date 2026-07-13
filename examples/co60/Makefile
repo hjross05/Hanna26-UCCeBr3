@@ -13,4 +13,4 @@ all:  $(patsubst %.mac,%.root,$(wildcard *.mac))
 	./co60_sim_sort.py $*.out 2>&1 | tee -a $*.log
 
 clean:
-	rm *.log *.out *.root *.wrl
+	rm -f *.log *.out *.root *.wrl

@@ -37,9 +37,9 @@ DetectorConstruction::DetectorConstruction()
 
   cradle_Messenger = new Cradle_Messenger(cradle);
   
-  the_CeBr3_Array = new CeBr3_Array(ExpHall_log, materials, cradle);
+  the_CeBrA_Array = new CeBrA_Array(ExpHall_log, materials, cradle);
 
-  the_CeBr3_Array_Messenger = new CeBr3_Array_Messenger(the_CeBr3_Array);
+  the_CeBrA_Array_Messenger = new CeBrA_Array_Messenger(the_CeBrA_Array);
 
 }
 
@@ -52,7 +52,7 @@ DetectorConstruction::~DetectorConstruction()
 G4VPhysicalVolume* DetectorConstruction::Construct()
 {
 
-  the_CeBr3_Array->Construct();
+  the_CeBrA_Array->Construct();
 
   //------------------------------------------------ 
   // Sensitive detectors
@@ -67,7 +67,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   TrackerGamma = new TrackerGammaSD("GammaTracker");
   TrackerGammaSDMessenger = new TrackerGammaSD_Messenger(TrackerGamma);
   SDman->AddNewDetector(TrackerGamma);
-  the_CeBr3_Array->MakeSensitive(TrackerGamma);
+  the_CeBrA_Array->MakeSensitive(TrackerGamma);
 
   return ExpHall_phys;
 }

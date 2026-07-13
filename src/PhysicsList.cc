@@ -51,6 +51,14 @@
 #include "G4PolarizedCompton.hh"
 #include "G4PolarizedGammaConversion.hh"
 
+#include "G4DecayPhysics.hh"
+
+#include "G4HadronElasticPhysics.hh"
+#include "G4HadronDElasticPhysics.hh"
+#include "G4HadronHElasticPhysics.hh"
+#include "G4HadronInelasticQBBC.hh"
+#include "G4IonPhysics.hh"
+
 #include "DetectorConstruction.hh"
 
 #include "G4LossTableManager.hh"
@@ -60,6 +68,11 @@
 #include "G4SystemOfUnits.hh"
 
 // particles
+
+#include "G4NuclideTable.hh"
+#include "G4UAtomicDeexcitation.hh"
+#include "G4NuclearLevelData.hh"
+#include "G4DeexPrecoParameters.hh"
 
 #include "G4BosonConstructor.hh"
 #include "G4LeptonConstructor.hh"
@@ -93,6 +106,19 @@ PhysicsList::PhysicsList(DetectorConstruction* det)
   //  fEmName = G4String("emstandard_opt4_Atima");
   //  fEmPhysicsList = new EmStandardPhysics_option4_Atima();
   
+  // Decay physics and all particles
+  fDecPhysicsList = new G4DecayPhysics(verboseLevel);
+
+  //read new PhotonEvaporation data set 
+  //
+  G4DeexPrecoParameters* deex = 
+    G4NuclearLevelData::GetInstance()->GetParameters();
+  deex->SetCorrelatedGamma(false);
+  deex->SetStoreAllLevels(true);
+  //  deex->SetIsomerProduction(true);  
+  deex->SetMaxLifeTime(G4NuclideTable::GetInstance()->GetThresholdOfHalfLife()
+                /std::log(2.));
+
   G4LossTableManager::Instance();
   // fix lower limit for cut
   G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(10*eV, 1*GeV);
@@ -111,29 +137,16 @@ PhysicsList::PhysicsList(DetectorConstruction* det)
 PhysicsList::~PhysicsList()
 {
   delete theMessenger;
+  delete fEmPhysicsList;
+  delete fDecPhysicsList;
+  for(size_t i=0; i<fHadronPhys.size(); i++) {delete fHadronPhys[i];}
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void PhysicsList::ConstructParticle()
 {
-    G4BosonConstructor  pBosonConstructor;
-    pBosonConstructor.ConstructParticle();
-
-    G4LeptonConstructor pLeptonConstructor;
-    pLeptonConstructor.ConstructParticle();
-
-    G4MesonConstructor pMesonConstructor;
-    pMesonConstructor.ConstructParticle();
-
-    G4BaryonConstructor pBaryonConstructor;
-    pBaryonConstructor.ConstructParticle();
-
-    G4IonConstructor pIonConstructor;
-    pIonConstructor.ConstructParticle();
-
-    G4ShortLivedConstructor pShortLivedConstructor;
-    pShortLivedConstructor.ConstructParticle();  
+  fDecPhysicsList->ConstructParticle();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -195,6 +208,16 @@ void PhysicsList::ConstructProcess()
     
   // Decay Process
   //
+
+  // decay physics list
+  //
+  fDecPhysicsList->ConstructProcess();
+  
+  // hadronic physics lists
+  for(size_t i=0; i<fHadronPhys.size(); i++) {
+    fHadronPhys[i]->ConstructProcess();
+  }
+
   AddRadioactiveDecay();  
 
   // step limitation (as a full process)

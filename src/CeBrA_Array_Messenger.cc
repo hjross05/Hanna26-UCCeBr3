@@ -1,6 +1,6 @@
-#include "CeBr3_Array_Messenger.hh"
+#include "CeBrA_Array_Messenger.hh"
 
-CeBr3_Array_Messenger::CeBr3_Array_Messenger(CeBr3_Array* NA)
+CeBrA_Array_Messenger::CeBrA_Array_Messenger(CeBrA_Array* NA)
 :CeBr3Array(NA)
 { 
  
@@ -51,7 +51,7 @@ CeBr3_Array_Messenger::CeBr3_Array_Messenger(CeBr3_Array* NA)
 
 
 
-CeBr3_Array_Messenger::~CeBr3_Array_Messenger()
+CeBrA_Array_Messenger::~CeBrA_Array_Messenger()
 {
   delete CeBr3Dir;
   delete XCmd;
@@ -65,7 +65,7 @@ CeBr3_Array_Messenger::~CeBr3_Array_Messenger()
 }
 
 
-void CeBr3_Array_Messenger::SetNewValue(G4UIcommand* command,G4String newValue)
+void CeBrA_Array_Messenger::SetNewValue(G4UIcommand* command,G4String newValue)
 { 
   if( command == XCmd )
     {CeBr3Array->setX(XCmd->GetNewDoubleValue(newValue));}

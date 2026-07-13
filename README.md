@@ -29,7 +29,7 @@ This is a simple example collecting a spectrum with a single CeBr detector from 
 
 ### `./examples/co60`
 
-This is a simulation of a <sup>60</sup>Co source placed in the CeBrA demonstrator. A sorting code `co60_sim_sort.py` is included which produces histograms in a `.root` file. A `Makefile` is included.
+This is a simulation of a <sup>60</sup>Co source placed in the CeBrA demonstrator. co60.mac simulates a 60Co source placed at the target position of CeBrA. The demonstrator configuration from 2024-2025 is placed using a geometry file: demonstrator.geo. Lead shielding bricks are placed with bricks.geo. The sorting code `co60_sim_sort.py` sorts singles spectra, with and without energy resolution folded in, a gamma-gamma coincidence matrix, and spectra of gamma rays collected in coincidence with the 1332 keV transition. A `Makefile` is included.
 
 ## Macro File Commands
 
@@ -37,7 +37,7 @@ This is a simulation of a <sup>60</sup>Co source placed in the CeBrA demonstrato
 
     /CeBr3/Type <2x2 | 3x3 | 3x4 | 3x6>
 
-> Set the type of CeBr3 detector to place.
+> Set the type of CeBr3 detector to place. If "Cradle" or "cradle" is included in the <type> string (3x4cradle, e.g.), a cradle is included with the detector.
 
     /CeBr3/setX <double> <unit>
     /CeBr3/setY <double> <unit>
@@ -57,11 +57,11 @@ This is a simulation of a <sup>60</sup>Co source placed in the CeBrA demonstrato
 
         <type(2x2 | 3x4 | 3x6)>  <X (mm)>  <Y (mm)>  <Z (mm)>  <X rotation (deg)>  <Y rotation (deg)>  <Z rotation (deg)>
 
-> If a geometry file is specified, the positioning and rotation commands above are ignored. If "Cradle" or "cradle" is included in the <type> string, a cradle is included with the detector.
+> If a geometry file is specified, the positioning and rotation commands above are ignored. If "Cradle" or "cradle" is included in the <type> string (3x4cradle, e.g.), a cradle is included with the detector.
 
 ### Source
 
-Realistic simulations of radioactive sources can be run as illustrated by `./examples/cs137/cs137.mac`. The Simple source is a computationally more efficient alternative that does not rely on the accuracy of the G4RadioactiveDecay class.
+Realistic simulations of radioactive sources can be run as illustrated by `./examples/cs137/cs137.mac` and `/examples/co60/co60.mac`. The Simple source (`./examples/cs137/cs137_simple.mac`) is a computationally more efficient alternative that does not rely on the accuracy of the G4RadioactiveDecay class.
 
     /Source/Simple <double> <unit>
 

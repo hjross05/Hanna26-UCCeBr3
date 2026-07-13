@@ -86,6 +86,8 @@ public:
 private:    
   G4VPhysicsConstructor* fEmPhysicsList;
   G4String               fEmName;
+  G4VPhysicsConstructor*               fDecPhysicsList;
+  std::vector<G4VPhysicsConstructor*>  fHadronPhys; 
     
   DetectorConstruction* fDet;
 

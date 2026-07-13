@@ -11,6 +11,11 @@
 
 # Processes ====================================================================
 
+# Produce Auger electrons and X-rays
+/process/em/auger true
+/process/had/deex/readICdata true
+/process/had/deex/setIC true
+
 # Gamma-ray angular correlation and polarized physics flags ====================
 /PhysicsList/AngularCorrelations true
 /PhysicsList/SetGammaPolarization false

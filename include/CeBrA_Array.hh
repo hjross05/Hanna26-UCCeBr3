@@ -1,24 +1,21 @@
-#ifndef CeBr3_Array_H
-#define CeBr3_Array_H
+#ifndef CeBrA_Array_H
+#define CeBrA_Array_H
 
-//#include "DetectorConstruction.hh"
-//#include "G4RunManager.hh"
 #include "CeBr3_2x2_Detector.hh"
 #include "CeBr3_3x3_Detector.hh"
 #include "CeBr3_3x4_Detector.hh"
 #include "CeBr3_3x6_Detector.hh"
 #include "Cradle.hh"
-//#include "Beam_Pipe.hh"
 #include "TrackerGammaSD.hh"
 
-class CeBr3_Array 
+class CeBrA_Array 
 {
 public:
   
-  CeBr3_Array(G4LogicalVolume*, Materials*, Cradle*);
-  ~CeBr3_Array();
+  CeBrA_Array(G4LogicalVolume*, Materials*, Cradle*);
+  ~CeBrA_Array();
 
-  // Used by the CeBr3_Array_Messenger for placing a single detector
+  // Used by the CeBrA_Array_Messenger for placing a single detector
   // (when a geometry file is not specified).
   void setX(G4double x){assemblyPos.setX(x);}
   void setY(G4double y){assemblyPos.setY(y);}
