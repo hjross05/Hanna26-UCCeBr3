@@ -8,20 +8,29 @@
 # Event count: 10,000 (larger run for more stable rate measurement).
 #
 # Results are written to two persistent files:
-#   tests/benchmark.log               - human-readable rate log (appended, gitignored)
-#                                       Hardware-dependent; records event rate and
-#                                       processor info for context.
-#   tests/benchmarks/event-counts.json - event count ground truth (tracked by git)
-#                                       Hardware-independent; records how many events
-#                                       appear in the output file for a given run size.
+#
+#   tests/benchmark.log
+#     Human-readable rate log (appended, gitignored). Hardware-dependent.
+#     A header line with git hash and hardware info is written once per test
+#     session at the top of each run block, followed by compact per-scenario
+#     result lines.
+#
+#   tests/benchmarks/event-counts.json
+#     Event count ground truth (tracked by git). Hardware-independent.
+#     Stores emitted and detected event counts per scenario, plus a meta block
+#     with git hash and hardware info from the run that established the baseline.
 #
 # If event-counts.json does not exist, or a scenario is not yet recorded,
 # the test creates/updates the file with the current run's results and passes.
-# On subsequent runs, the test asserts the event count matches the stored value.
+# On subsequent runs the test performs two checks:
+#   1. Emitted event count matches the stored baseline exactly.
+#   2. |current_detected - baseline_detected| <= 2 * sqrt(baseline_detected)
+#      This is a Poisson consistency check on the detection rate.
 
 import os
 import sys
 import json
+import math
 import unittest
 import tempfile
 from datetime import datetime
@@ -68,21 +77,39 @@ def _save_event_counts(counts):
         json.dump(counts, f, indent=2)
 
 
-def _append_benchmark_log(scenario, n_events, elapsed, proc_info, git_hash):
+def _write_benchmark_header(proc_info, git_hash):
     """
-    Append one timestamped line to benchmark.log.
-    This file is gitignored because event rates are hardware-dependent.
+    Append a session header block to benchmark.log.
+    Called once per test run (in setUpClass) so that git hash and hardware
+    info appear only once per session rather than on every result line.
 
     Format:
-      YYYY-MM-DD HH:MM:SS | <scenario> | <n> events | <rate> events/s |
-      bin: <hash> | CPU: <model> | cores: <n> | MHz: <mhz> | OS: <os>
+      === YYYY-MM-DD HH:MM:SS | bin: <hash> | CPU: <model> | cores: <n> | MHz: <mhz> | OS: <os> ===
     """
-    rate = int(n_events / elapsed) if elapsed > 0 else 0
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    header = (
+        f"=== {timestamp} | bin: {git_hash} | "
+        f"CPU: {proc_info['cpu']} | cores: {proc_info['cores']} | "
+        f"MHz: {proc_info['mhz']} | OS: {proc_info['os']} ===\n"
+    )
+    with open(BENCHMARK_LOG, "a") as f:
+        f.write(header)
+
+
+def _append_benchmark_log(scenario, n_emitted, n_detected, elapsed):
+    """
+    Append one compact result line to benchmark.log.
+    Git hash and hardware info are not repeated here — they appear in the
+    session header written by _write_benchmark_header at the start of the run.
+
+    Format:
+      YYYY-MM-DD HH:MM:SS | <scenario> | <n_emitted> emitted | <rate> events/s | <n_detected> detected
+    """
+    rate = int(n_emitted / elapsed) if elapsed > 0 else 0
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     line = (
-        f"{timestamp} | {scenario} | {n_events} events | {rate} events/s | "
-        f"bin: {git_hash} | CPU: {proc_info['cpu']} | cores: {proc_info['cores']} | "
-        f"MHz: {proc_info['mhz']} | OS: {proc_info['os']}\n"
+        f"{timestamp} | {scenario} | {n_emitted} emitted | "
+        f"{rate} events/s | {n_detected} detected\n"
     )
     with open(BENCHMARK_LOG, "a") as f:
         f.write(line)
@@ -91,7 +118,9 @@ def _append_benchmark_log(scenario, n_events, elapsed, proc_info, git_hash):
 def _run_benchmark(mac_path, cwd, scenario):
     """
     Run a benchmark scenario and measure elapsed wall-clock time.
-    Returns (n_events_in_output, elapsed_seconds).
+    Returns (n_emitted, n_detected, elapsed_seconds) where:
+      n_emitted  = total number of events in the output (one per E-line)
+      n_detected = number of events with at least one detector hit (D-line present)
     Raises RuntimeError if the binary exits non-zero.
     Cleans up temporary files before returning.
     """
@@ -112,40 +141,58 @@ def _run_benchmark(mac_path, cwd, scenario):
             f"stderr: {stderr}"
         )
 
-    # Count events in output; each unique event_id counts as one event
+    # Parse output: count total events and those with at least one detector hit
     events = parse_output(outfile)
-    n_events = len(events)
+    n_emitted  = len(events)
+    n_detected = sum(1 for ev in events if ev["n_dets_hit"] > 0)
 
     # Remove output file and temp directory
     if os.path.exists(outfile):
         os.remove(outfile)
     os.rmdir(tmpdir)
 
-    return n_events, elapsed
+    return n_emitted, n_detected, elapsed
 
 
 class BenchmarkTests(unittest.TestCase):
     """
     Benchmark tests for UCCeBrA.
-    Measures event rate (logged to benchmark.log, gitignored) and verifies
-    event counts (stored in event-counts.json, git-tracked).
+    Measures event rate and detection statistics, logging results to
+    benchmark.log (gitignored) and event-counts.json (git-tracked).
     """
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Write a session header to benchmark.log once before any scenario runs.
+        This records git hash and hardware info a single time per test session
+        rather than repeating them on every result line.
+        """
+        cls.proc_info = get_processor_info()
+        cls.git_hash  = get_git_hash()
+        _write_benchmark_header(cls.proc_info, cls.git_hash)
 
     def _run_and_record(self, scenario, mac_path, cwd):
         """
         Shared logic for a benchmark test:
         1. Run the simulation and measure elapsed time.
-        2. Collect processor info and git hash for context.
-        3. Append results to benchmark.log (hardware-dependent rate log).
-        4. Assert or initialise event-counts.json (hardware-independent counts).
+        2. Append a compact result line to benchmark.log.
+        3. Assert or initialise event-counts.json.
+
+        On first run for a scenario:
+          - Stores emitted_events, detected_events, git hash, and hardware info.
+          - Test passes (baseline established).
+
+        On subsequent runs:
+          - Asserts emitted count matches baseline exactly.
+          - Asserts |current_detected - baseline_detected| <= 2 * sqrt(baseline_detected).
+            This is a Poisson consistency check: if the detection rate is stable,
+            fluctuations should be within ~2 standard deviations.
         """
-        n_events, elapsed = _run_benchmark(mac_path, cwd, scenario)
+        n_emitted, n_detected, elapsed = _run_benchmark(mac_path, cwd, scenario)
 
-        proc_info = get_processor_info()
-        git_hash  = get_git_hash()
-
-        # Always append to rate log — hardware-dependent, not tracked by git
-        _append_benchmark_log(scenario, n_events, elapsed, proc_info, git_hash)
+        # Append compact result line; header was already written in setUpClass
+        _append_benchmark_log(scenario, n_emitted, n_detected, elapsed)
 
         # Load existing event-counts.json, or start fresh if it does not exist
         counts = _load_event_counts()
@@ -153,29 +200,44 @@ class BenchmarkTests(unittest.TestCase):
             counts = {}
 
         if scenario not in counts:
-            # First run for this scenario: store current count and processor info,
-            # then pass — the baseline has just been established.
+            # First run for this scenario: record baseline and pass
             counts[scenario] = {
-                "expected_events": n_events,
-                "cpu":   proc_info["cpu"],
-                "cores": proc_info["cores"],
-                "mhz":   proc_info["mhz"],
-                "os":    proc_info["os"],
+                "emitted_events":  n_emitted,
+                "detected_events": n_detected,
+            }
+            # Update meta block with current git hash and hardware info
+            counts["meta"] = {
+                "git_hash": self.git_hash,
+                "cpu":      self.proc_info["cpu"],
+                "cores":    self.proc_info["cores"],
+                "mhz":      self.proc_info["mhz"],
+                "os":       self.proc_info["os"],
             }
             _save_event_counts(counts)
-            # Test passes on first run
+            # Test passes on first run — baseline has been established
             return
 
-        # Subsequent runs: assert the event count matches the stored baseline.
-        # A mismatch suggests a change to the output format or simulation logic.
-        expected = counts[scenario]["expected_events"]
+        # --- Check 1: emitted event count must match baseline exactly ---
+        expected_emitted = counts[scenario]["emitted_events"]
         self.assertEqual(
-            n_events, expected,
-            f"{scenario}: expected {expected} events in output, got {n_events}. "
+            n_emitted, expected_emitted,
+            f"{scenario}: expected {expected_emitted} emitted events, got {n_emitted}. "
             f"This may indicate a change in the output format or simulation logic "
-            f"(e.g. EventAction.cc was modified). If the change is intentional, "
-            f"delete the scenario entry from tests/benchmarks/event-counts.json "
-            f"and re-run to establish a new baseline."
+            f"(e.g. EventAction.cc was modified). If intentional, delete the scenario "
+            f"entry from tests/benchmarks/event-counts.json and re-run to reset baseline."
+        )
+
+        # --- Check 2: detected event count must be within 2*sqrt(baseline) ---
+        baseline_detected = counts[scenario]["detected_events"]
+        tolerance = 2.0 * math.sqrt(baseline_detected)
+        deviation = abs(n_detected - baseline_detected)
+        self.assertLessEqual(
+            deviation, tolerance,
+            f"{scenario}: detected events {n_detected} deviates from baseline "
+            f"{baseline_detected} by {deviation:.1f}, which exceeds 2*sqrt({baseline_detected}) "
+            f"= {tolerance:.1f}. This suggests a change in detection efficiency. "
+            f"If intentional, reset the baseline by deleting the scenario entry from "
+            f"tests/benchmarks/event-counts.json and re-running."
         )
 
     def test_cs137_benchmark(self):

@@ -1,4 +1,17 @@
 {
-  "cs137_simple": {"expected_events": 10000},
-  "co60":         {"expected_events": 10000}
+  "co60": {
+    "emitted_events": 10000,
+    "detected_events": 2561
+  },
+  "meta": {
+    "git_hash": "7a38780",
+    "cpu": "Intel(R) Core(TM) i7-14700",
+    "cores": 28,
+    "mhz": 5300.0,
+    "os": "Linux 6.8.0-124-generic"
+  },
+  "cs137_simple": {
+    "emitted_events": 10000,
+    "detected_events": 68
+  }
 }
