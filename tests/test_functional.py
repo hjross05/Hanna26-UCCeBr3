@@ -9,8 +9,15 @@
 # invoked once per scenario.
 
 import os
+import sys
 import unittest
 import tempfile
+
+# Ensure the repository root is on sys.path so this file can be run directly
+# with 'python3 tests/test_functional.py' as well as via the module form.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
 from tests.output_parser import find_binary, patch_mac, run_simulation, parse_output
 
@@ -29,8 +36,11 @@ CS137_DETECTOR_ID    = 1       # single detector setup — only detector ID 1 is
 CS137_EMITTED_ENERGY = 662.0
 CS137_ENERGY_TOL     = 0.01    # keV tolerance for emitted energy check
 
-# co60 emits a 1173/1332 keV cascade. Max possible deposited energy is 1332 keV.
-CO60_MAX_ENERGY_KEV  = 1332.0
+# co60 emits a 1173 keV + 1332 keV cascade. In a coincidence summing event both
+# gammas can deposit all their energy in a single detector, so the maximum
+# deposited energy is the sum of both gammas plus a small tolerance for
+# Geant4 floating-point precision in energy accounting.
+CO60_MAX_ENERGY_KEV  = 2506.0  # 1173 + 1332 + 1 keV tolerance
 CO60_MIN_DETECTOR_ID = 1
 CO60_MAX_DETECTOR_ID = 9       # demonstrator array has 9 detectors
 

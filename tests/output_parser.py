@@ -21,17 +21,44 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def find_binary():
     """
     Locate the compiled UCCeBrA binary.
-    Returns the absolute path to the binary.
-    Raises FileNotFoundError with a clear message if not found.
+
+    The Geant4 build system places the binary at:
+      $G4WORKDIR/bin/$G4SYSTEM/UCCeBrA
+
+    $G4WORKDIR defaults to ~/geant4_workdir if the environment variable is set,
+    but may also be set to a custom path. $G4SYSTEM is typically 'Linux-g++'.
+    When building in-source (G4WORKDIR not set), the binary lands inside the
+    repository at bin/Linux-g++/UCCeBrA.
+
+    Search order:
+      1. $G4WORKDIR/bin/$G4SYSTEM/UCCeBrA  (canonical Geant4 out-of-source path)
+      2. REPO_ROOT/bin/$G4SYSTEM/UCCeBrA   (in-source fallback)
+
+    Returns the absolute path to the first binary found.
+    Raises FileNotFoundError with a clear message listing all paths checked.
     """
-    binary_path = os.path.join(REPO_ROOT, "bin", "Linux-g++", "UCCeBrA")
-    if not os.path.isfile(binary_path):
-        raise FileNotFoundError(
-            f"UCCeBrA binary not found at {binary_path}.\n"
-            "Please build the simulation first with 'make' at the repository root,\n"
-            "ensuring Geant4 is sourced (source /path/to/geant4.sh)."
-        )
-    return binary_path
+    g4workdir = os.environ.get("G4WORKDIR", "")
+    g4system  = os.environ.get("G4SYSTEM", "Linux-g++")
+
+    candidates = []
+
+    # Canonical out-of-source path: $G4WORKDIR/bin/$G4SYSTEM/UCCeBrA
+    if g4workdir:
+        candidates.append(os.path.join(g4workdir, "bin", g4system, "UCCeBrA"))
+
+    # In-source fallback: <repo_root>/bin/$G4SYSTEM/UCCeBrA
+    candidates.append(os.path.join(REPO_ROOT, "bin", g4system, "UCCeBrA"))
+
+    for path in candidates:
+        if os.path.isfile(path):
+            return path
+
+    checked = "\n  ".join(candidates)
+    raise FileNotFoundError(
+        f"UCCeBrA binary not found. Paths checked:\n  {checked}\n"
+        "Please build the simulation first with 'make' at the repository root,\n"
+        "ensuring Geant4 is sourced (source /path/to/geant4.sh)."
+    )
 
 
 def get_git_hash():

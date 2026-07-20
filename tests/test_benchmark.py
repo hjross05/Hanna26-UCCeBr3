@@ -20,10 +20,17 @@
 # On subsequent runs, the test asserts the event count matches the stored value.
 
 import os
+import sys
 import json
 import unittest
 import tempfile
 from datetime import datetime
+
+# Ensure the repository root is on sys.path so this file can be run directly
+# with 'python3 tests/test_benchmark.py' as well as via the module form.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
 from tests.output_parser import (
     find_binary, patch_mac, run_simulation, parse_output,
