@@ -7,6 +7,7 @@
 # No third-party dependencies — Python standard library only.
 
 import os
+import shutil
 import subprocess
 import platform
 import tempfile
@@ -16,6 +17,17 @@ import time
 # Repository root: two levels up from this file (tests/output_parser.py)
 # ---------------------------------------------------------------------------
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Directory where test working directories are created. Using a path inside
+# the repository guarantees write access on all platforms, avoiding macOS
+# /var/folders permission issues. Gitignored.
+TESTS_TMP = os.path.join(REPO_ROOT, "tests", "tmp")
+
+# Geometry files that co60.mac references by relative path. They are copied
+# into each co60 test directory so the binary can find them when run with
+# cwd=<test_dir>.
+CO60_GEO_SRC = os.path.join(REPO_ROOT, "examples", "co60")
+CO60_GEO_FILES = ["demonstrator.geo", "bricks.geo"]
 
 
 def find_binary():
@@ -151,15 +163,55 @@ def get_processor_info():
     return {"cpu": cpu, "cores": cores, "mhz": round(mhz, 1), "os": os_str}
 
 
-def patch_mac(source_mac, output_filepath, n_events):
+def prepare_test_dir(name):
     """
-    Read a Geant4 macro file and return a path to a patched temporary copy.
+    Create (or clear and recreate) tests/tmp/<name>/.
+    Returns the absolute path to the directory.
+
+    The directory is cleared on every run so the user always sees fresh results.
+    Using a directory inside the repository avoids macOS /var/folders permission
+    issues that arise when the binary tries to write to the system temp directory.
+    """
+    path = os.path.join(TESTS_TMP, name)
+    if os.path.exists(path):
+        # Remove all contents so the directory is clean for this run
+        shutil.rmtree(path)
+    os.makedirs(path)
+    return path
+
+
+def copy_co60_geometry(dest_dir):
+    """
+    Copy co60 geometry files (demonstrator.geo, bricks.geo) from examples/co60/
+    into dest_dir.
+
+    co60.mac references these files by relative path, so the binary must be run
+    with cwd=dest_dir. Copying them in makes each test directory self-contained
+    and lets users inspect all inputs in one place.
+    """
+    for fname in CO60_GEO_FILES:
+        src = os.path.join(CO60_GEO_SRC, fname)
+        dst = os.path.join(dest_dir, fname)
+        shutil.copy2(src, dst)
+
+
+def patch_mac(source_mac, output_filepath, n_events, dir=None):
+    """
+    Read a Geant4 macro file and return a path to a patched copy.
     Replaces:
       - '/run/beamOn <N>'       with '/run/beamOn <n_events>'
       - '/Output/Filename <x>'  with '/Output/Filename <output_filepath>'
-    output_filepath must be an absolute path so the binary can be run
-    from any working directory without the output landing in an unexpected place.
-    Returns the path to the temporary macro file (caller must delete it).
+        The replacement is inserted immediately before '/run/beamOn' regardless
+        of where the original line appeared, ensuring the output file is set
+        after all geometry and physics initialisation.
+
+    output_filepath must be an absolute path.
+
+    dir: directory in which to create the patched macro file. Defaults to the
+         system temp directory. Pass a path inside the repository to avoid
+         macOS /var/folders permission issues.
+
+    Returns the path to the patched macro file.
     """
     assert os.path.isabs(output_filepath), \
         f"output_filepath must be absolute, got: {output_filepath}"
@@ -171,15 +223,24 @@ def patch_mac(source_mac, output_filepath, n_events):
     for line in lines:
         stripped = line.strip()
         if stripped.startswith("/run/beamOn"):
+            # Always place /Output/Filename immediately before /run/beamOn,
+            # regardless of where it appeared in the original macro. This
+            # ensures the filename is set after /run/initialize and all
+            # geometry setup, which matters for macros like co60.mac where
+            # the original /Output/Filename line follows /run/initialize.
+            patched.append(f"/Output/Filename {output_filepath}\n")
             patched.append(f"/run/beamOn {n_events}\n")
         elif stripped.startswith("/Output/Filename"):
-            patched.append(f"/Output/Filename {output_filepath}\n")
+            # Skip the original line — it is replaced before /run/beamOn above
+            pass
         else:
             patched.append(line)
 
-    # Write to a named temp file that persists until the caller explicitly deletes it
+    # Write the patched macro into the specified directory (or system temp if
+    # dir is None). Using dir=<test_subdir> keeps all test inputs together and
+    # avoids macOS /var/folders write-permission issues.
     tmp = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".mac", delete=False, prefix="ucce_test_"
+        mode="w", suffix=".mac", delete=False, prefix="ucce_test_", dir=dir
     )
     tmp.writelines(patched)
     tmp.flush()

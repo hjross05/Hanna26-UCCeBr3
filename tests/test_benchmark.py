@@ -32,7 +32,6 @@ import sys
 import json
 import math
 import unittest
-import tempfile
 from datetime import datetime
 
 # Ensure the repository root is on sys.path so this file can be run directly
@@ -43,14 +42,13 @@ if _REPO_ROOT not in sys.path:
 
 from tests.output_parser import (
     find_binary, patch_mac, run_simulation, parse_output,
-    get_git_hash, get_processor_info
+    get_git_hash, get_processor_info,
+    prepare_test_dir, copy_co60_geometry
 )
 
 REPO_ROOT        = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CS137_MAC        = os.path.join(REPO_ROOT, "examples", "cs137", "cs137_simple.mac")
 CO60_MAC         = os.path.join(REPO_ROOT, "examples", "co60", "co60.mac")
-# co60.mac references geometry files by relative path; must run from this directory
-CO60_CWD         = os.path.join(REPO_ROOT, "examples", "co60")
 BENCHMARK_LOG    = os.path.join(REPO_ROOT, "tests", "benchmark.log")
 COUNTS_JSON      = os.path.join(REPO_ROOT, "tests", "benchmarks", "event-counts.json")
 BENCHMARK_EVENTS = 10000
@@ -115,25 +113,28 @@ def _append_benchmark_log(scenario, n_emitted, n_detected, elapsed):
         f.write(line)
 
 
-def _run_benchmark(mac_path, cwd, scenario):
+def _run_benchmark(mac_path, scenario, is_co60=False):
     """
     Run a benchmark scenario and measure elapsed wall-clock time.
     Returns (n_emitted, n_detected, elapsed_seconds) where:
       n_emitted  = total number of events in the output (one per E-line)
       n_detected = number of events with at least one detector hit (D-line present)
     Raises RuntimeError if the binary exits non-zero.
-    Cleans up temporary files before returning.
+
+    Uses a named subdirectory under tests/tmp/ so the user can inspect the
+    macro file, geometry files, and output file after the run.
     """
-    binary = find_binary()
-    tmpdir = os.path.realpath(tempfile.mkdtemp(prefix=f"ucce_bench_{scenario}_"))
-    outfile = os.path.join(tmpdir, f"bench_{scenario}.out")
-    macfile = patch_mac(mac_path, outfile, BENCHMARK_EVENTS)
+    binary  = find_binary()
+    testdir = prepare_test_dir(f"benchmark_{scenario}")
+    outfile = os.path.join(testdir, f"bench_{scenario}.out")
 
-    rc, stdout, stderr, elapsed = run_simulation(binary, macfile, cwd=cwd)
+    if is_co60:
+        # co60.mac references demonstrator.geo and bricks.geo by relative path;
+        # copy them into the test directory so the binary finds them
+        copy_co60_geometry(testdir)
 
-    # Remove temp macro immediately after run
-    if os.path.exists(macfile):
-        os.remove(macfile)
+    macfile = patch_mac(mac_path, outfile, BENCHMARK_EVENTS, dir=testdir)
+    rc, stdout, stderr, elapsed = run_simulation(binary, macfile, cwd=testdir)
 
     if rc != 0:
         raise RuntimeError(
@@ -142,14 +143,9 @@ def _run_benchmark(mac_path, cwd, scenario):
         )
 
     # Parse output: count total events and those with at least one detector hit
-    events = parse_output(outfile)
+    events     = parse_output(outfile)
     n_emitted  = len(events)
     n_detected = sum(1 for ev in events if ev["n_dets_hit"] > 0)
-
-    # Remove output file and temp directory
-    if os.path.exists(outfile):
-        os.remove(outfile)
-    os.rmdir(tmpdir)
 
     return n_emitted, n_detected, elapsed
 
@@ -172,7 +168,7 @@ class BenchmarkTests(unittest.TestCase):
         cls.git_hash  = get_git_hash()
         _write_benchmark_header(cls.proc_info, cls.git_hash)
 
-    def _run_and_record(self, scenario, mac_path, cwd):
+    def _run_and_record(self, scenario, mac_path, is_co60=False):
         """
         Shared logic for a benchmark test:
         1. Run the simulation and measure elapsed time.
@@ -189,7 +185,7 @@ class BenchmarkTests(unittest.TestCase):
             This is a Poisson consistency check: if the detection rate is stable,
             fluctuations should be within ~2 standard deviations.
         """
-        n_emitted, n_detected, elapsed = _run_benchmark(mac_path, cwd, scenario)
+        n_emitted, n_detected, elapsed = _run_benchmark(mac_path, scenario, is_co60=is_co60)
 
         # Append compact result line; header was already written in setUpClass
         _append_benchmark_log(scenario, n_emitted, n_detected, elapsed)
@@ -245,8 +241,6 @@ class BenchmarkTests(unittest.TestCase):
         self._run_and_record(
             scenario="cs137_simple",
             mac_path=CS137_MAC,
-            # cs137_simple.mac has no relative file references; run from tests/
-            cwd=os.path.join(REPO_ROOT, "tests"),
         )
 
     def test_co60_benchmark(self):
@@ -254,7 +248,7 @@ class BenchmarkTests(unittest.TestCase):
         self._run_and_record(
             scenario="co60",
             mac_path=CO60_MAC,
-            cwd=CO60_CWD,
+            is_co60=True,
         )
 
 

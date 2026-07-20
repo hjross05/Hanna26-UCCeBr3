@@ -7,11 +7,14 @@
 # Each class runs the simulation once in setUpClass and parses the output.
 # All tests in the class share the parsed result — the binary is only
 # invoked once per scenario.
+#
+# Test working directories are created under tests/tmp/ and left in place
+# after the run so the user can inspect the macro file, geometry files,
+# and output file.
 
 import os
 import sys
 import unittest
-import tempfile
 
 # Ensure the repository root is on sys.path so this file can be run directly
 # with 'python3 tests/test_functional.py' as well as via the module form.
@@ -19,13 +22,14 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
-from tests.output_parser import find_binary, patch_mac, run_simulation, parse_output
+from tests.output_parser import (
+    find_binary, patch_mac, run_simulation, parse_output,
+    prepare_test_dir, copy_co60_geometry
+)
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CS137_MAC = os.path.join(REPO_ROOT, "examples", "cs137", "cs137_simple.mac")
 CO60_MAC  = os.path.join(REPO_ROOT, "examples", "co60", "co60.mac")
-# co60.mac references geometry files by relative path; must run from this directory
-CO60_CWD  = os.path.join(REPO_ROOT, "examples", "co60")
 
 FUNCTIONAL_EVENTS = 1000
 
@@ -36,11 +40,10 @@ CS137_DETECTOR_ID    = 1       # single detector setup — only detector ID 1 is
 CS137_EMITTED_ENERGY = 662.0
 CS137_ENERGY_TOL     = 0.01    # keV tolerance for emitted energy check
 
-# co60 emits a 1173 keV + 1332 keV cascade. In a coincidence summing event both
+# co60 emits a 1173 + 1332 keV cascade. In a coincidence summing event both
 # gammas can deposit all their energy in a single detector, so the maximum
-# deposited energy is the sum of both gammas plus a small tolerance for
-# Geant4 floating-point precision in energy accounting.
-CO60_MAX_ENERGY_KEV  = 2600.0  # 1173 + 1332 keV cascade, with headroom
+# deposited energy is the sum of both gammas plus a small tolerance.
+CO60_MAX_ENERGY_KEV  = 2600.0
 CO60_MIN_DETECTOR_ID = 1
 CO60_MAX_DETECTOR_ID = 9       # demonstrator array has 9 detectors
 
@@ -68,16 +71,17 @@ class FunctionalTestCs137(unittest.TestCase):
     """
     Functional tests for the cs137_simple scenario.
     Validates output format, event counts, and physics bounds.
+    Working directory: tests/tmp/functional_cs137/
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.binary = find_binary()
-        cls.tmpdir = os.path.realpath(tempfile.mkdtemp(prefix="ucce_func_cs137_"))
-        cls.outfile = os.path.join(cls.tmpdir, "func_cs137.out")
-        cls.macfile = patch_mac(CS137_MAC, cls.outfile, FUNCTIONAL_EVENTS)
+        cls.binary  = find_binary()
+        cls.testdir = prepare_test_dir("functional_cs137")
+        cls.outfile = os.path.join(cls.testdir, "func_cs137.out")
+        cls.macfile = patch_mac(CS137_MAC, cls.outfile, FUNCTIONAL_EVENTS, dir=cls.testdir)
         rc, stdout, stderr, _ = run_simulation(
-            cls.binary, cls.macfile, cwd=cls.tmpdir
+            cls.binary, cls.macfile, cwd=cls.testdir
         )
         if rc != 0:
             raise RuntimeError(
@@ -89,14 +93,6 @@ class FunctionalTestCs137(unittest.TestCase):
         # Collect all raw lines for format checks
         with open(cls.outfile) as f:
             cls.raw_lines = f.readlines()
-
-    @classmethod
-    def tearDownClass(cls):
-        for f in [cls.macfile, cls.outfile]:
-            if os.path.exists(f):
-                os.remove(f)
-        if os.path.exists(cls.tmpdir):
-            os.rmdir(cls.tmpdir)
 
     # --- Format checks ---
 
@@ -220,16 +216,19 @@ class FunctionalTestCo60(unittest.TestCase):
     Functional tests for the co60 scenario.
     Validates output format, event counts, and physics bounds for the
     full 9-detector CeBrA array with Co-60 radioactive decay source.
+    Working directory: tests/tmp/functional_co60/
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.binary = find_binary()
-        cls.tmpdir = os.path.realpath(tempfile.mkdtemp(prefix="ucce_func_co60_"))
-        cls.outfile = os.path.join(cls.tmpdir, "func_co60.out")
-        cls.macfile = patch_mac(CO60_MAC, cls.outfile, FUNCTIONAL_EVENTS)
+        cls.binary  = find_binary()
+        cls.testdir = prepare_test_dir("functional_co60")
+        # Copy geometry files so the binary finds them by relative path
+        copy_co60_geometry(cls.testdir)
+        cls.outfile = os.path.join(cls.testdir, "func_co60.out")
+        cls.macfile = patch_mac(CO60_MAC, cls.outfile, FUNCTIONAL_EVENTS, dir=cls.testdir)
         rc, stdout, stderr, _ = run_simulation(
-            cls.binary, cls.macfile, cwd=CO60_CWD
+            cls.binary, cls.macfile, cwd=cls.testdir
         )
         if rc != 0:
             raise RuntimeError(
@@ -241,14 +240,6 @@ class FunctionalTestCo60(unittest.TestCase):
         # Collect all raw lines for format checks
         with open(cls.outfile) as f:
             cls.raw_lines = f.readlines()
-
-    @classmethod
-    def tearDownClass(cls):
-        for f in [cls.macfile, cls.outfile]:
-            if os.path.exists(f):
-                os.remove(f)
-        if os.path.exists(cls.tmpdir):
-            os.rmdir(cls.tmpdir)
 
     def test_line_format(self):
         """Every line must be a valid record type: D, C, E, sub-record, or blank."""
@@ -284,14 +275,14 @@ class FunctionalTestCo60(unittest.TestCase):
             )
 
     def test_energy_bounds(self):
-        """Deposited energy must be > 0 and <= 1332.0 keV (co60 max gamma energy)."""
+        """Deposited energy must be > 0 and <= 2600.0 keV (co60 cascade + headroom)."""
         for ev in self.events:
             for hit in ev["hits"]:
                 self.assertGreater(hit["edep"], 0.0,
                     f"Event {ev['event_id']}: non-positive energy {hit['edep']} keV")
                 self.assertLessEqual(hit["edep"], CO60_MAX_ENERGY_KEV,
                     f"Event {ev['event_id']}: energy {hit['edep']} keV exceeds "
-                    f"max co60 gamma energy {CO60_MAX_ENERGY_KEV} keV")
+                    f"{CO60_MAX_ENERGY_KEV} keV")
 
     def test_detector_id_range(self):
         """All detector IDs must be in range 1-9 (demonstrator array has 9 detectors)."""
