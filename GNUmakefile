@@ -21,8 +21,25 @@ else
 PREV_GIT_HASH := ""
 endif
 
-.PHONY: all
+.PHONY: all test test-smoke test-functional test-benchmark
 all: include/Git_Hash.hh lib bin
+
+# Run the full test suite (smoke + functional + benchmark).
+# Requires the binary to be built first: make && make test
+test:
+	python3 tests/run_tests.py
+
+# Run smoke tests only — quick check that the binary runs and produces output.
+test-smoke:
+	python3 tests/test_smoke.py
+
+# Run functional tests only — output format, event counts, physics sanity.
+test-functional:
+	python3 tests/test_functional.py
+
+# Run benchmark tests only — event rate logging and event count verification.
+test-benchmark:
+	python3 tests/test_benchmark.py
 
 include/Git_Hash.hh: FORCE
 ifneq ($(PREV_GIT_HASH),$(GIT_HASH))
