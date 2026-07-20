@@ -233,9 +233,27 @@ code in detail.
 
 ### Testing
 
-A testing suite for functionality and performance is planned but not yet present.
-There is currently no automated way to verify that a change is correct. "It compiles
-and the example runs" is a necessary condition, not a sufficient one.
+A Python `unittest` testing suite lives in `tests/`. Run it from the repository root:
+
+```bash
+python tests/run_tests.py
+```
+
+Individual suites can be run directly:
+
+```bash
+python tests/test_smoke.py        # binary runs, output file created
+python tests/test_functional.py   # format, counts, physics sanity
+python tests/test_benchmark.py    # event rate and event count logging
+```
+
+The suite requires the binary to be built (`make`) before running.
+Benchmark event rates are logged to `tests/benchmark.log` (gitignored,
+hardware-dependent). Event counts are stored in
+`tests/benchmarks/event-counts.json` (tracked by git, hardware-independent).
+
+"It compiles and the example runs" is a necessary condition, not a sufficient one.
+Physics correctness still requires human review.
 
 ---
 
