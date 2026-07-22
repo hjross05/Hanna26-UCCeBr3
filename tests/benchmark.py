@@ -3,7 +3,7 @@
 
 Modelled on the UCGretina test suite. Run via make targets:
   make test            # smoke + sources
-  make test-smoke      # quick sanity check (100 events)
+  make test-smoke      # quick sanity check (1000 events)
   make test-functional # detection ratio comparison (100000 events)
   make test-benchmark  # events/sec timing, detection ratio (1000000 events)
 """
@@ -321,7 +321,7 @@ BASELINE_KEY = {
 # Smoke tests
 # ---------------------------------------------------------------------------
 
-SMOKE_EVENTS = 100
+SMOKE_EVENTS = 1000
 
 # Each entry: (test_name, binary_name, base_macro_filename, example_path,
 #              support_files)
