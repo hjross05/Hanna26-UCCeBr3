@@ -23,7 +23,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TESTS_DIR = os.path.join(PROJECT_ROOT, "tests")
 TMP_DIR = os.path.join(TESTS_DIR, "tmp")
 BASELINES_FILE = os.path.join(TESTS_DIR, "baselines.json")
-BENCHMARK_LOG = os.path.join(PROJECT_ROOT, "benchmark.log")
+FUNCTIONAL_LOG = os.path.join(PROJECT_ROOT, "functional_tests.log")
 
 
 def find_binary(name):
@@ -239,17 +239,20 @@ def get_cpu_info():
     return socket.gethostname()
 
 
-def append_benchmark_log(rows):
-    """Append timing rows to benchmark.log (TSV).
+def append_functional_log(rows):
+    """Append functional test results to functional_tests.log (TSV).
 
     Writes a header line the first time the file is created.
     Each row is a tuple of values that will be joined with tabs.
-    Columns: date, git_hash, git_branch, cpu, variant, events,
-             events_per_sec, ratio, sigma.
+    Columns: date, git_hash, git_branch, cpu, test_name, events,
+             ratio, sigma, baseline_ratio, baseline_sigma, n_sigma, verdict.
     """
-    header = "date\tgit_hash\tgit_branch\tcpu\tvariant\tevents\tevents_per_sec\tratio\tsigma\n"
-    write_header = not os.path.isfile(BENCHMARK_LOG)
-    with open(BENCHMARK_LOG, "a") as f:
+    header = (
+        "date\tgit_hash\tgit_branch\tcpu\ttest_name\tevents\t"
+        "ratio\tsigma\tbaseline_ratio\tbaseline_sigma\tn_sigma\tverdict\n"
+    )
+    write_header = not os.path.isfile(FUNCTIONAL_LOG)
+    with open(FUNCTIONAL_LOG, "a") as f:
         if write_header:
             f.write(header)
         for row in rows:
@@ -451,6 +454,10 @@ def run_functional(mode):
     print(f"\n=== test-{mode} ({FUNCTIONAL_EVENTS} events) ===")
     baselines = load_baselines()
     failures = 0
+    log_rows = []
+    git_hash, git_branch = get_git_info()
+    cpu = get_cpu_info()
+    today = datetime.date.today().isoformat()
 
     for (test_name, binary_name, macro_file,
          example_path, support_files, out_file) in FUNCTIONAL_CASES[mode]:
@@ -488,6 +495,11 @@ def run_functional(mode):
             print(f"[NO BASELINE] {test_name:<30} "
                   f"ratio={ratio:.4f}\xb1{sigma:.4f}  "
                   f"(run make test-benchmark to set baseline)")
+            log_rows.append((
+                today, git_hash, git_branch, cpu, test_name, FUNCTIONAL_EVENTS,
+                f"{ratio:.6f}", f"{sigma:.6f}",
+                "N/A", "N/A", "N/A", "NO BASELINE",
+            ))
             continue
 
         ratio_base = baseline_entry["ratio"]
@@ -513,6 +525,15 @@ def run_functional(mode):
             failures += 1
 
         print(f"{verdict:<16} {test_name:<30} {ratio_str}  {base_str}  {n_sigma:.2f}\u03c3")
+
+        log_rows.append((
+            today, git_hash, git_branch, cpu, test_name, FUNCTIONAL_EVENTS,
+            f"{ratio:.6f}", f"{sigma:.6f}",
+            f"{ratio_base:.6f}", f"{sigma_base:.6f}",
+            f"{n_sigma:.4f}", verdict.strip("[]"),
+        ))
+
+    append_functional_log(log_rows)
 
     if failures:
         print(f"\n{failures} FAILED")
@@ -554,19 +575,16 @@ def run_benchmark(n_events):
     so the functional tests can compare against them.
 
     No pass/fail — this is for establishing baselines and tracking
-    performance over time. Results are appended to benchmark.log (TSV,
-    gitignored).
+    performance over time. Stores ratio and sigma in baselines.json.
     """
     git_hash, git_branch = get_git_info()
     cpu = get_cpu_info()
-    today = datetime.date.today().isoformat()
 
     print(f"\n=== Benchmark ({n_events} events, commit {git_hash}, branch {git_branch}) ===")
     print(f"CPU: {cpu}")
     print(f"{'Variant':<20} {'Events/sec':>12}  {'Ratio':>8}  {'Sigma':>8}")
     print("-" * 56)
 
-    rows = []
     baselines = load_baselines()
 
     for variant, binary_name, macro_file, example_path, support_files in BENCHMARK_CASES:
@@ -581,8 +599,6 @@ def run_benchmark(n_events):
         eps = parse_events_per_sec(stdout)
         if eps is None or returncode != 0:
             print(f"  {variant:<20} {'ERROR':>12}")
-            rows.append((today, git_hash, git_branch, cpu, variant,
-                         n_events, "ERROR", "ERROR", "ERROR"))
             continue
 
         output_path = os.path.join(workdir, "output.out")
@@ -594,13 +610,8 @@ def run_benchmark(n_events):
         # Store ratio baseline for functional tests to compare against.
         baselines[variant] = {"ratio": ratio, "sigma": sigma}
 
-        rows.append((today, git_hash, git_branch, cpu, variant,
-                     n_events, f"{eps:.0f}", f"{ratio:.6f}", f"{sigma:.6f}"))
-
     save_baselines(baselines)
-    append_benchmark_log(rows)
     print(f"\nBaselines updated in tests/baselines.json")
-    print(f"Results appended to benchmark.log")
 
 
 # ---------------------------------------------------------------------------
