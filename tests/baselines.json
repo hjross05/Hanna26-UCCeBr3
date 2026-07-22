@@ -1,9 +1,17 @@
 {
   "_meta": {
-    "git_hash": "2e781e",
+    "git_hash": "b97a20",
     "git_branch": "main",
     "cpu": "Intel(R) Core(TM) i7-14700"
   },
   "sources_cs137": 2004,
-  "sources_co60": 3554
+  "sources_co60": 3554,
+  "UCCeBrA_cs137": {
+    "ratio": 0.007129,
+    "sigma": 8.443340571124678e-05
+  },
+  "UCCeBrA_co60": {
+    "ratio": 0.24947,
+    "sigma": 0.0004994697188018509
+  }
 }

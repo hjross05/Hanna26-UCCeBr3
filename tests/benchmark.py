@@ -608,22 +608,27 @@ def run_benchmark(n_events):
 # ---------------------------------------------------------------------------
 
 def update_baselines():
-    """Re-run all functional tests and reset baselines to observed values.
+    """Re-run the benchmark and reset ratio baselines to observed values.
 
-    Wipes baselines.json first so every test triggers [BASELINE SET].
-    If any test fails mid-update, the original baselines are restored.
+    Wipes ratio entries from baselines.json first, then runs the benchmark
+    to establish fresh ratio+sigma baselines. If the benchmark fails
+    mid-run, the original baselines are restored.
+
+    Note: this runs 1,000,000 events per scenario (the benchmark default).
+    Use --events to override if a faster update is needed.
     """
-    print("Resetting all baselines...")
+    print("Resetting all baselines (running benchmark)...")
     old_content = None
     if os.path.isfile(BASELINES_FILE):
         with open(BASELINES_FILE) as f:
             old_content = f.read()
-    if os.path.isfile(BASELINES_FILE):
-        os.remove(BASELINES_FILE)
+    # Wipe existing ratio entries so benchmark sets them fresh.
+    baselines = load_baselines()
+    cleaned = {k: v for k, v in baselines.items() if not isinstance(v, dict)}
+    save_baselines(cleaned)
     try:
-        for mode in ["sources"]:
-            run_functional(mode)
-    except SystemExit:
+        run_benchmark(1000000)
+    except Exception:
         if old_content is not None:
             with open(BASELINES_FILE, "w") as f:
                 f.write(old_content)
