@@ -159,13 +159,6 @@ def check_fatal(stdout, stderr):
     return any(p in combined for p in fatal_patterns)
 
 
-def count_lines(filepath):
-    """Return the number of lines in a file using wc -l."""
-    result = subprocess.run(["wc", "-l", filepath], capture_output=True, text=True)
-    if result.returncode != 0:
-        return 0
-    return int(result.stdout.strip().split()[0])
-
 
 def load_baselines():
     """Load baselines.json and return the test-name -> line-count dict.
@@ -201,31 +194,6 @@ def save_baselines(data):
         json.dump(out, f, indent=2)
         f.write("\n")
 
-
-def check_baseline(name, observed, baselines):
-    """Compare an observed line count against a stored baseline.
-
-    Uses a 2*sqrt(N) Poisson tolerance: Monte Carlo statistical variation
-    between runs is expected to be within ~2 standard deviations.
-
-    If no baseline exists for this test, records the observed count as
-    the new baseline and returns (True, '[BASELINE SET] ...').
-
-    Returns:
-        Tuple of (passed: bool, message: str).
-    """
-    if name not in baselines:
-        baselines[name] = observed
-        return True, f"[BASELINE SET] {name}: {observed} lines"
-    baseline = baselines[name]
-    tolerance = 2 * math.sqrt(baseline)
-    if abs(observed - baseline) <= tolerance:
-        return True, (f"[PASS] {name:<30} output lines={observed}  "
-                      f"baseline={baseline}  tolerance=\xb1{tolerance:.0f}")
-    else:
-        return False, (f"[FAIL] {name:<30} output lines={observed}  "
-                       f"baseline={baseline}  tolerance=\xb1{tolerance:.0f}  "
-                       f"** out of range **")
 
 
 def get_git_info():
@@ -285,6 +253,67 @@ def append_benchmark_log(rows):
             f.write(header)
         for row in rows:
             f.write("\t".join(str(v) for v in row) + "\n")
+
+
+def count_detected_and_simulated(filepath):
+    """Count detected and simulated events in a UCCeBrA output file.
+
+    Each line beginning with 'E' corresponds to one simulated event.
+    Each line beginning with 'D' corresponds to one detected event
+    (an event in which at least one detector registered energy).
+
+    Args:
+        filepath: Absolute path to the simulation output file.
+
+    Returns:
+        Tuple of (n_detected, n_simulated) as integers.
+        Returns (0, 0) if the file cannot be read.
+    """
+    n_detected = 0
+    n_simulated = 0
+    try:
+        with open(filepath, "r") as f:
+            for line in f:
+                if line.startswith("D"):
+                    n_detected += 1
+                elif line.startswith("E"):
+                    n_simulated += 1
+    except OSError:
+        return 0, 0
+    return n_detected, n_simulated
+
+
+def compute_ratio(n_detected, n_simulated):
+    """Compute the detection ratio and its Poisson uncertainty.
+
+    ratio = n_detected / n_simulated
+    sigma = sqrt(n_detected) / n_simulated
+
+    The uncertainty follows from treating n_detected as a Poisson count:
+    the standard deviation of a Poisson count N is sqrt(N), so the
+    fractional uncertainty on the ratio is sqrt(N_detected) / N_simulated.
+
+    Args:
+        n_detected: Number of detected events (D lines in output).
+        n_simulated: Number of simulated events (E lines in output).
+
+    Returns:
+        Tuple of (ratio, sigma) as floats. Returns (0.0, 0.0) if
+        n_simulated is zero.
+    """
+    if n_simulated == 0:
+        return 0.0, 0.0
+    ratio = n_detected / n_simulated
+    sigma = math.sqrt(n_detected) / n_simulated
+    return ratio, sigma
+
+
+# Maps functional test names to the corresponding benchmark variant label
+# used as the key in baselines.json.
+BASELINE_KEY = {
+    "sources_cs137": "UCCeBrA_cs137",
+    "sources_co60":  "UCCeBrA_co60",
+}
 
 
 # ---------------------------------------------------------------------------
