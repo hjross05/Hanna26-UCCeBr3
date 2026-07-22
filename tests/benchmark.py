@@ -428,17 +428,25 @@ FUNCTIONAL_CASES = {
 
 
 def run_functional(mode):
-    """Run functional tests for a given mode, comparing output line counts
-    against stored baselines.
+    """Run functional tests and compare detection ratios against benchmark baselines.
 
-    Line count is a proxy for detection rate (more detections = more output
-    lines). The tolerance is 2*sqrt(baseline) to accommodate Monte Carlo
-    statistical variation between runs.
+    For each scenario:
+      1. Runs FUNCTIONAL_EVENTS events.
+      2. Parses the output file to compute the detection ratio and its
+         Poisson uncertainty (sqrt(detected) / simulated).
+      3. Looks up the benchmark baseline ratio from baselines.json.
+         If no baseline exists, prints [NO BASELINE] and skips comparison.
+      4. Computes the number of standard deviations between the test ratio
+         and the benchmark baseline:
+           n_sigma = |ratio_test - ratio_baseline|
+                     / sqrt(sigma_test^2 + sigma_baseline^2)
+      5. Verdict:
+           n_sigma < 2           -> [PASS]
+           2 <= n_sigma < 3      -> [MARGINAL PASS]
+           n_sigma >= 3          -> [FAIL]
 
-    Baselines are stored in tests/baselines.json. On first run, each test
-    auto-records its result as the baseline ([BASELINE SET]).
-
-    Exits 1 if any test fails.
+    Exits 1 if any test fails (3 sigma or more) or if the simulation
+    crashes. Marginal passes do not cause a non-zero exit.
     """
     print(f"\n=== test-{mode} ({FUNCTIONAL_EVENTS} events) ===")
     baselines = load_baselines()
@@ -454,6 +462,7 @@ def run_functional(mode):
         write_run_macro(macro_file, FUNCTIONAL_EVENTS, wrapper)
         stdout, stderr, returncode = run_sim(binary, wrapper, workdir)
 
+        # Check that the simulation ran cleanly.
         ok, msg = _check_run_criteria(test_name, stdout, stderr, returncode)
         if not ok:
             print(msg)
@@ -466,13 +475,44 @@ def run_functional(mode):
             failures += 1
             continue
 
-        observed = count_lines(output_path)
-        passed, msg = check_baseline(test_name, observed, baselines)
-        print(msg)
-        if not passed:
+        # Compute detection ratio for this test run.
+        n_detected, n_simulated = count_detected_and_simulated(output_path)
+        ratio, sigma = compute_ratio(n_detected, n_simulated)
+
+        # Look up benchmark baseline using the variant label mapping.
+        baseline_key = BASELINE_KEY.get(test_name)
+        baseline_entry = baselines.get(baseline_key) if baseline_key else None
+
+        if baseline_entry is None or not isinstance(baseline_entry, dict):
+            # No benchmark baseline established yet — cannot compare.
+            print(f"[NO BASELINE] {test_name:<30} "
+                  f"ratio={ratio:.4f}\xb1{sigma:.4f}  "
+                  f"(run make test-benchmark to set baseline)")
+            continue
+
+        ratio_base = baseline_entry["ratio"]
+        sigma_base = baseline_entry["sigma"]
+
+        # Combined uncertainty from both the test run and the baseline.
+        combined_sigma = math.sqrt(sigma**2 + sigma_base**2)
+        if combined_sigma == 0:
+            n_sigma = 0.0
+        else:
+            n_sigma = abs(ratio - ratio_base) / combined_sigma
+
+        # Format readout line.
+        base_str = f"baseline={ratio_base:.4f}\xb1{sigma_base:.4f}"
+        ratio_str = f"ratio={ratio:.4f}\xb1{sigma:.4f}"
+
+        if n_sigma < 2:
+            verdict = "[PASS]"
+        elif n_sigma < 3:
+            verdict = "[MARGINAL PASS]"
+        else:
+            verdict = "[FAIL]"
             failures += 1
 
-    save_baselines(baselines)
+        print(f"{verdict:<16} {test_name:<30} {ratio_str}  {base_str}  {n_sigma:.2f}\u03c3")
 
     if failures:
         print(f"\n{failures} FAILED")
