@@ -5,7 +5,7 @@ Modelled on the UCGretina test suite. Run via make targets:
   make test            # smoke + sources
   make test-smoke      # quick sanity check (100 events)
   make test-functional # line-count regression (1000 events)
-  make test-benchmark  # events/sec timing (10000 events)
+  make test-benchmark  # events/sec timing, detection ratio (1000000 events)
 """
 
 import argparse
@@ -244,9 +244,10 @@ def append_benchmark_log(rows):
 
     Writes a header line the first time the file is created.
     Each row is a tuple of values that will be joined with tabs.
-    Columns: date, git_hash, git_branch, cpu, variant, events, events_per_sec.
+    Columns: date, git_hash, git_branch, cpu, variant, events,
+             events_per_sec, ratio, sigma.
     """
-    header = "date\tgit_hash\tgit_branch\tcpu\tvariant\tevents\tevents_per_sec\n"
+    header = "date\tgit_hash\tgit_branch\tcpu\tvariant\tevents\tevents_per_sec\tratio\tsigma\n"
     write_header = not os.path.isfile(BENCHMARK_LOG)
     with open(BENCHMARK_LOG, "a") as f:
         if write_header:
@@ -505,10 +506,16 @@ BENCHMARK_CASES = [
 
 
 def run_benchmark(n_events):
-    """Run all scenarios for n_events and log events/sec to benchmark.log.
+    """Run all scenarios and record events/sec, detection ratio, and sigma.
 
-    No pass/fail — this is for performance tracking over time.
-    Results are appended to benchmark.log (TSV, gitignored).
+    Parses the output file after each run to compute the detection ratio
+    (detected events / simulated events) and its Poisson uncertainty
+    (sqrt(detected) / simulated). Stores ratio and sigma in baselines.json
+    so the functional tests can compare against them.
+
+    No pass/fail — this is for establishing baselines and tracking
+    performance over time. Results are appended to benchmark.log (TSV,
+    gitignored).
     """
     git_hash, git_branch = get_git_info()
     cpu = get_cpu_info()
@@ -516,10 +523,11 @@ def run_benchmark(n_events):
 
     print(f"\n=== Benchmark ({n_events} events, commit {git_hash}, branch {git_branch}) ===")
     print(f"CPU: {cpu}")
-    print(f"{'Variant':<20} {'Events/sec':>12}")
-    print("-" * 34)
+    print(f"{'Variant':<20} {'Events/sec':>12}  {'Ratio':>8}  {'Sigma':>8}")
+    print("-" * 56)
 
     rows = []
+    baselines = load_baselines()
 
     for variant, binary_name, macro_file, example_path, support_files in BENCHMARK_CASES:
         binary = find_binary(binary_name)
@@ -533,14 +541,26 @@ def run_benchmark(n_events):
         eps = parse_events_per_sec(stdout)
         if eps is None or returncode != 0:
             print(f"  {variant:<20} {'ERROR':>12}")
-            eps = 0
-        else:
-            print(f"  {variant:<20} {eps:>12.0f}")
+            rows.append((today, git_hash, git_branch, cpu, variant,
+                         n_events, "ERROR", "ERROR", "ERROR"))
+            continue
 
-        rows.append((today, git_hash, git_branch, cpu, variant, n_events, f"{eps:.0f}"))
+        output_path = os.path.join(workdir, "output.out")
+        n_detected, n_simulated = count_detected_and_simulated(output_path)
+        ratio, sigma = compute_ratio(n_detected, n_simulated)
 
+        print(f"  {variant:<20} {eps:>12.0f}  {ratio:>8.4f}  {sigma:>8.4f}")
+
+        # Store ratio baseline for functional tests to compare against.
+        baselines[variant] = {"ratio": ratio, "sigma": sigma}
+
+        rows.append((today, git_hash, git_branch, cpu, variant,
+                     n_events, f"{eps:.0f}", f"{ratio:.6f}", f"{sigma:.6f}"))
+
+    save_baselines(baselines)
     append_benchmark_log(rows)
-    print(f"\nResults appended to benchmark.log")
+    print(f"\nBaselines updated in tests/baselines.json")
+    print(f"Results appended to benchmark.log")
 
 
 # ---------------------------------------------------------------------------
@@ -586,8 +606,8 @@ def main():
         help="Test mode to run"
     )
     parser.add_argument(
-        "--events", type=int, default=10000,
-        help="Event count for benchmark mode (default: 10000)"
+        "--events", type=int, default=1000000,
+        help="Event count for benchmark mode (default: 1000000)"
     )
     parser.add_argument(
         "--update-baselines", action="store_true",
