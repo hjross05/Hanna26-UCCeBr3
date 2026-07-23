@@ -219,3 +219,19 @@ Run the macro file `vis/vis.mac` an interactive session:
 This generates a VRML 2 file named `g4_XX.wrl` which can be viewed with a VRML viewer (like view3dscene, FreeWRL, or mayavi2).
 
 The macro file `./vis/trajectories.mac` illustrates how to add particle trajectories to visualizations.
+
+## Tests ##
+
+There are several targets in the `GNUmakefile` that run tests using selected example macro files as templates.
+
+    $ make test-smoke
+
+runs functionality tests with 1000 events for quick testing.
+
+    $ make test-functional
+
+runs functionality tests and collects event rates and detection ratios from 100,000-event simulations in the `functional_tests.log` file. Detection ratios are compared with benchmarks from 1,000,000-event simulations stored in ./tests/baselines.json. (Note that event rates are hardware and context dependent.)
+
+    $ make test-baselines
+	
+runs 1,000,000-event simulations and writes detection ratios to `./tests/baselines.json` for comparison with future functionality tests.

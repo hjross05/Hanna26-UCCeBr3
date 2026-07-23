@@ -619,7 +619,7 @@ def run_benchmark(n_events):
 # ---------------------------------------------------------------------------
 
 def update_baselines():
-    """Re-run the benchmark and reset ratio baselines to observed values.
+    """Reset detection ratio baselines.
 
     Wipes ratio entries from baselines.json first, then runs the benchmark
     to establish fresh ratio+sigma baselines. If the benchmark fails
@@ -645,7 +645,6 @@ def update_baselines():
                 f.write(old_content)
             print("Baseline update failed — original baselines restored.")
         raise
-    print("Baselines updated.")
 
 
 # ---------------------------------------------------------------------------
@@ -658,12 +657,12 @@ def main():
     )
     parser.add_argument(
         "--mode", required=False, default=None,
-        choices=["smoke", "sources", "benchmark"],
+        choices=["smoke", "sources", "baselines"],
         help="Test mode to run"
     )
     parser.add_argument(
         "--events", type=int, default=1000000,
-        help="Event count for benchmark mode (default: 1000000)"
+        help="Event count for baselines mode (default: 1000000)"
     )
     parser.add_argument(
         "--update-baselines", action="store_true",
@@ -684,7 +683,7 @@ def main():
         run_smoke()
     elif args.mode == "sources":
         run_functional("sources")
-    elif args.mode == "benchmark":
+    elif args.mode == "baselines":
         run_benchmark(args.events)
 
 

@@ -24,22 +24,24 @@ endif
 .PHONY: all test test-smoke test-functional test-benchmark
 all: include/Git_Hash.hh lib bin
 
-# Run the full test suite: smoke check then line-count regression.
-# Requires the binary to be built first: make && make test
-test:
-	python3 tests/benchmark.py --mode smoke && python3 tests/benchmark.py --mode sources
+
+
+# Testing suite
+# (Require the binary to be built first.)
 
 # Run smoke tests only — quick check that the binary runs and produces output.
 test-smoke:
 	python3 tests/benchmark.py --mode smoke
 
-# Run functional tests only — line-count regression against baselines.json.
+# Run functional tests only and compare detection ratios against
+# ./tests/baselines.json.
 test-functional:
 	python3 tests/benchmark.py --mode sources
 
-# Run benchmark tests only — event rate logging to benchmark.log.
-test-benchmark:
-	python3 tests/benchmark.py --mode benchmark
+# Run 1,000,000 event simulations and store detection ratios to
+# ./tests/baselines.json
+test-baselines:
+	python3 tests/benchmark.py --update-baselines
 
 include/Git_Hash.hh: FORCE
 ifneq ($(PREV_GIT_HASH),$(GIT_HASH))

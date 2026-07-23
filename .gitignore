@@ -9,7 +9,4 @@ tmp*
 .vscode
 .DS_Store
 git_hash
-
-# Test suite temporary files
-tests/tmp/
-tests/ucce_test_*.mac
+__pycache__
