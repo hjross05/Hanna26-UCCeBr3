@@ -151,15 +151,18 @@ public:
   G4double Window_Radius;
   G4double Window_Length;
 
+ 
+
 
   G4Material* Al;
   G4Material* Steel = G4NistManager::Instance()->FindOrBuildMaterial("G4_STAINLESS-STEEL");
   G4Material* quartz;
+  G4Material* plastic;
 
   G4double startAngle; 
   G4double spanningAngle; 
 
-  //G4ThreeVector Pos; //(sphere)
+  G4ThreeVector Pos; //(sphere)
 
   G4ThreeVector Hemi_Pos;
   //G4RotationMatrix Hemi_Rot;
@@ -247,6 +250,19 @@ public:
   G4ThreeVector BUKF25C_Shift;
   G4ThreeVector BLKF25C_Shift;
   G4ThreeVector LDKF25C_Shift;
+
+  //Cradles
+  G4RotationMatrix CradleHole_Rot;
+  G4RotationMatrix Cradle0_Rot;
+  G4ThreeVector Cradle0_Shift;
+  G4ThreeVector Cradle1_Shift;
+  G4ThreeVector Cradle2_Shift;
+  G4ThreeVector Cradle3_Shift;
+  G4ThreeVector Cradle4_Shift;
+  G4ThreeVector Cradle5_Shift;
+  G4ThreeVector Cradle6_Shift;
+  G4ThreeVector Cradle7_Shift;
+  G4ThreeVector Cradle8_Shift;
 
 
   G4LogicalVolume*  Hemi_log;
@@ -336,6 +352,18 @@ public:
   G4VPhysicalVolume* BUKF25C_phys;
   G4VPhysicalVolume* BLKF25C_phys;
   G4VPhysicalVolume* LDKF25C_phys;
+
+  G4LogicalVolume* LargeCradle_log;
+  G4LogicalVolume* SmallCradle_log;
+  G4VPhysicalVolume* Cradle0_phys;
+  G4VPhysicalVolume* Cradle1_phys;
+  G4VPhysicalVolume* Cradle2_phys;
+  G4VPhysicalVolume* Cradle3_phys;
+  G4VPhysicalVolume* Cradle4_phys;
+  G4VPhysicalVolume* Cradle5_phys;
+  G4VPhysicalVolume* Cradle6_phys;
+  G4VPhysicalVolume* Cradle7_phys;
+  G4VPhysicalVolume* Cradle8_phys;
 };
 
 #endif

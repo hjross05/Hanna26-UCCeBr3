@@ -134,11 +134,8 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   //Glass Window
   Window_Radius = 2.6289 * cm;
   Window_Length = .2*2.54*cm;
+  
 
-  //Sphere
-  /*Pos.setX(0);
-  Pos.setY(0);
-  Pos.setZ(0);*/
 
   BPShift.setX(0);
   BPShift.setY(0);
@@ -174,7 +171,7 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   LKF50_Shift.setZ(0*cm);
 
   //Opp Flange Glass Port
-  LBKF50_Shift.setX(14.7795*cm);
+  LBKF50_Shift.setX(14.7*cm);
   LBKF50_Shift.setZ(0*cm);
 
   //Hole on top of chamber
@@ -223,38 +220,7 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   //Wings
   Wing_Shift.setY(-2.41*2.54*cm);
 
-  //Mounts
-  L90_Shift.setX(22*cm);
-  L90_Shift.setY(-5.7*cm);
-  L90_Shift.setZ(4.5*cm);
-
-  R90_Shift.setX(22*cm);
-  R90_Shift.setY(-5.7*cm);
-  R90_Shift.setZ(-4.28*cm);
-
-  L270_Shift.setX(-22*cm);
-  L270_Shift.setY(-5.7*cm);
-  L270_Shift.setZ(4.5*cm);
-
-  R270_Shift.setX(-22*cm);
-  R270_Shift.setY(-5.7*cm);
-  R270_Shift.setZ(-4.28*cm);
-
-  L220_Shift.setX(17.34*cm);
-  L220_Shift.setY(-5.7*cm);
-  L220_Shift.setZ(-13.54*cm);
-
-  R220_Shift.setX(10.32*cm);
-  R220_Shift.setY(-5.7*cm);
-  R220_Shift.setZ(-19.42*cm);
-
-  L142_Shift.setX(-9.892*cm);
-  L142_Shift.setY(-5.7*cm);
-  L142_Shift.setZ(-20.282*cm);
-
-  R142_Shift.setX(-16.85*cm);
-  R142_Shift.setY(-5.7*cm);
-  R142_Shift.setZ(-14.14*cm);
+  
 
   //Guage Supports
   Horizon_Shift.setX(10.770 * cm);
@@ -300,6 +266,7 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   LDKF25C_Shift.setY(31.736*cm);
   LDKF25C_Shift.setZ(-12.302*cm);
 
+  
 
 
   Rot = G4RotationMatrix::IDENTITY;
@@ -363,7 +330,7 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   Horizon_Rot = G4RotationMatrix::IDENTITY;
   Horizon_Rot.rotateY(130*deg);
 
-
+  
 
 }
 
@@ -539,7 +506,7 @@ void Target_Chamber::Construct()
 
 
   //Vertical Detector Mounts
-  std::vector<G4TwoVector> polygon;
+  /*std::vector<G4TwoVector> polygon;
   polygon.push_back(G4TwoVector( 0.00 * 2.54 * cm,  0.00 * 2.54 * cm)); // V1: Bottom-Right
   polygon.push_back(G4TwoVector( 0.00 * 2.54 * cm,  5.26 * 2.54 * cm)); // V2: Bottom-Left
   polygon.push_back(G4TwoVector(-2.31 * 2.54 * cm,  7.57 * 2.54 * cm)); // V3: Inner bend
@@ -556,13 +523,22 @@ void Target_Chamber::Construct()
   Mount_log = new G4LogicalVolume(rawPlate, Steel, "Mount_log");
 
   L90_phys = new G4PVPlacement(G4Transform3D(Rot, L90_Shift), Mount_log, "L90", expHall_log, false, 0);
-  //R90_phys = new G4PVPlacement(G4Transform3D(Rot, R90_Shift), Mount_log, "R90", expHall_log, false, 0);
+  R90_phys = new G4PVPlacement(G4Transform3D(Rot, R90_Shift), Mount_log, "R90", expHall_log, false, 0);
   L270_phys = new G4PVPlacement(G4Transform3D(M270_Rot, L270_Shift), Mount_log, "L270", expHall_log, false, 0);
-  //R270_phys = new G4PVPlacement(G4Transform3D(M270_Rot, R270_Shift), Mount_log, "R270", expHall_log, false, 0);
+  R270_phys = new G4PVPlacement(G4Transform3D(M270_Rot, R270_Shift), Mount_log, "R270", expHall_log, false, 0);
   L220_phys = new G4PVPlacement(G4Transform3D(M220_Rot, L220_Shift), Mount_log, "L220", expHall_log, false, 0);
   R220_phys = new G4PVPlacement(G4Transform3D(M220_Rot, R220_Shift), Mount_log, "R220", expHall_log, false, 0);
   L142_phys = new G4PVPlacement(G4Transform3D(M142_Rot, L142_Shift), Mount_log, "L142", expHall_log, false, 0);
-  R142_phys = new G4PVPlacement(G4Transform3D(M142_Rot, R142_Shift), Mount_log, "R142", expHall_log, false, 0);
+  R142_phys = new G4PVPlacement(G4Transform3D(M142_Rot, R142_Shift), Mount_log, "R142", expHall_log, false, 0);*/
+
+
+  /*G4Box* LCradleBox = new G4Box("LCradleBox", LCradleBox_Length, LCradleBox_Width, LCradleBox_Depth);
+  G4Tubs* LCradleHole = new G4Tubs("LCradleHole", 0, LCradleHole_Radius, LCradleHole_Length, 0*deg, 360*deg);
+  G4SubtractionSolid* LCradle = new G4SubtractionSolid("LCradle", LCradleBox, LCradleHole, G4Transform3D(CradleHole_Rot, Pos));
+
+  LargeCradle_log = new G4LogicalVolume(LCradle, plastic, "LargeCradle_log");
+
+  Cradle0_phys = new G4PVPlacement(G4Transform3D(Cradle0_Rot, Cradle0_Shift), LargeCradle_log, "Cradle0", expHall_log, false, 0);*/
 
   //Guage Supports
   /*G4Tubs* Horizon = new G4Tubs("Horizon", 0, Horizon_Radius, Horizon_Length, 0*deg, 360*deg);

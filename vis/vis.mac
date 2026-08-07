@@ -1,9 +1,12 @@
-/CeBr3/GeometryFile demonstrator_24.geo
+/CeBr3/GeometryFile FSU_55FeDPG.geo
 
 /Chamber/Construct
 
 /Brick/GeometryFile bricks.geo
 /Brick/Construct 
+
+/Mount/GeometryFile Mounts.geo
+/Mount/Construct
 
 # Initialize run manager =======================================================
 /run/initialize

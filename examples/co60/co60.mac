@@ -2,12 +2,15 @@
 #/tracking/verbose 2
 
 # Geometry =====================================================================
-/CeBr3/GeometryFile demonstrator.geo
+/CeBr3/GeometryFile FSU_55FeDPG.geo
 
 /Chamber/Construct
 
 /Brick/GeometryFile bricks.geo
 /Brick/Construct
+
+/Mount/GeometryFile Mounts.geo
+/Mount/Construct
 
 # Processes ====================================================================
 
