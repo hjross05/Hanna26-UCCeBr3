@@ -41,6 +41,11 @@ DetectorConstruction::DetectorConstruction()
 
   the_CeBrA_Array_Messenger = new CeBrA_Array_Messenger(the_CeBrA_Array);
 
+  mount = new Detector_Mount(ExpHall_log, materials);
+
+  mount_Messenger = new Detector_Mount_Messenger(mount);
+
+
 }
 
 DetectorConstruction::~DetectorConstruction()

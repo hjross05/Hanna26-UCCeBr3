@@ -8,9 +8,9 @@ Lead_Brick::Lead_Brick(G4LogicalVolume* experimentalHall_log,
 
   Pb = materials->FindMaterial("Pb");
 
-  Length=2.54*6*cm;
-  Width=2.54*4*cm;
-  Depth=2.54*2*cm;
+  Length=20*cm;
+  Width=10*cm;
+  Depth=5*cm;
   
   Pos.setX(0);
   Pos.setY(0);

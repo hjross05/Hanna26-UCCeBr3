@@ -6,6 +6,7 @@
 #include "CeBr3_3x4_Detector.hh"
 #include "CeBr3_3x6_Detector.hh"
 #include "Cradle.hh"
+#include "Detector_Mount.hh"
 #include "TrackerGammaSD.hh"
 
 class CeBrA_Array 
@@ -44,6 +45,8 @@ private:
   
   G4ThreeVector assemblyPos;
   G4RotationMatrix assemblyRot;
+  G4RotationMatrix Mount_Rot;
+  G4ThreeVector Mount_Shift;
   G4String detectorType;
   
   G4String geoFileName;

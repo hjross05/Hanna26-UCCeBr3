@@ -18,6 +18,8 @@
 #include "Source_Capsule.hh"
 #include "Source_Capsule_Messenger.hh"
 #include "Source_Cradle.hh"
+#include "Detector_Mount.hh"
+#include "Detector_Mount_Messenger.hh"
 #include "Source_Cradle_Messenger.hh"
 #include "G4LogicalVolume.hh"
 #include "G4VPhysicalVolume.hh"
@@ -65,6 +67,8 @@ private:
   Lab_Bench_Messenger* bench_Messenger;
   Cradle_Messenger* cradle_Messenger;
   Target_Chamber_Messenger* chamber_Messenger;
+  Detector_Mount* mount;
+  Detector_Mount_Messenger* mount_Messenger;
 
   Materials* materials;
 };
