@@ -343,7 +343,7 @@ SMOKE_CASES = [
         "UCCeBrA",
         "func_smoke_co60.mac",
         "examples/co60/co60.mac",
-        ["demonstrator.geo", "bricks.geo"],  # geometry files for the demonstrator array
+        ["CeBrA_2026.geo", "mounts.geo", "bricks.geo"],  # geometry files for the demonstrator array
     ),
 ]
 
@@ -424,7 +424,7 @@ FUNCTIONAL_CASES = {
             "UCCeBrA",
             "func_sources_co60.mac",
             "examples/co60/co60.mac",
-            ["demonstrator.geo", "bricks.geo"],  # demonstrator array geometry
+            ["CeBrA_2026.geo", "mounts.geo", "bricks.geo"],  # demonstrator array geometry
             "output.out",
         ),
     ],
@@ -564,7 +564,7 @@ BENCHMARK_CASES = [
         "UCCeBrA",
         "bench_co60.mac",
         "examples/co60/co60.mac",
-        ["demonstrator.geo", "bricks.geo"],
+        ["CeBrA_2026.geo", "mounts.geo", "bricks.geo"],
     ),
 ]
 
