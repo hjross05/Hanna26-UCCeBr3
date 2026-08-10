@@ -1,4 +1,0 @@
-9           # Number of detectors
-0.47 0.47 0.47 0.47 0.47 0.47 0.47 0.47 0.47   # Resolution parameters
-12000        # Maximum energy (keV)
-12000        # Number of bins
