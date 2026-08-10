@@ -1,5 +1,5 @@
 #ifndef Git_Hash_h
 #define Git_Hash_h
-#define GIT_HASH "78abc4"
+#define GIT_HASH "fcca60"
 #define GIT_BRANCH "main"
 #endif
