@@ -8,6 +8,8 @@
 /Mount/GeometryFile Mounts.geo
 /Mount/Construct
 
+/Source/Capsule/Construct
+
 # Initialize run manager =======================================================
 /run/initialize
 

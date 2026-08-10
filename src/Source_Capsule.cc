@@ -33,7 +33,8 @@ G4VPhysicalVolume* Source_Capsule::Construct()
     // Spectrum Techniques disk sources
     // https://www.spectrumtechniques.com/product/rss8
     
-    Depth=0.125*25.4*mm;           // 1/8 inch thickness
+    //Depth=0.125*25.4*mm;           // 1/8 inch thickness
+    Depth=5.56*mm; // FSU 152Eu and 60Co Sources
     Radius=25.4/2.0*mm;            // 1 inch OD
     innerRadius=0.125/2.0*25.4*mm; // 1/4 inch diameter divot
     startAngle      = 45.*deg;
@@ -45,9 +46,11 @@ G4VPhysicalVolume* Source_Capsule::Construct()
       {         0,      0, innerRadius, innerRadius};
     const G4double rOuter[4] =
       {    Radius, Radius,      Radius,      Radius};
+
+    G4Tubs* capsule = new G4Tubs("Capsule", 0, Radius, Depth/2, 0*deg, 360*deg);
     
-    G4Polycone* capsule = new G4Polycone("Capsule", startAngle, spanningAngle,
-    					 4, zPlane, rInner, rOuter);
+    /*G4Polycone* capsule = new G4Polycone("Capsule", startAngle, spanningAngle,
+    					 4, zPlane, rInner, rOuter);*/
 
     //    G4Tubs* capsule = new G4Tubs("Capsule", 0, Radius, Depth/2.0,
     //				 startAngle,spanningAngle);
@@ -79,6 +82,12 @@ G4VPhysicalVolume* Source_Capsule::Construct()
     
     capsule_log = new G4LogicalVolume(capsule, aluminum, "capsule_log",
 				      0, 0, 0);
+  
+  }else if (capsuleType == "FSU_Ba133"){
+    Length = 23.33*mm;
+    Width = 11.13*mm;
+    Depth = 2.4*mm;
+
   } else {
 
     G4cerr << "Unknown capsule type: " << capsuleType << G4endl;

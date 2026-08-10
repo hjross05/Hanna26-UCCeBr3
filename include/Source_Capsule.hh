@@ -67,6 +67,8 @@ public:
   // dimensions
   G4double Depth;
   G4double Radius;
+  G4double Length;
+  G4double Width;
   G4double innerRadius;
   G4double Thickness;
   G4double startAngle;
