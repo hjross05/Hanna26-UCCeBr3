@@ -15,6 +15,7 @@
 #include "G4ThreeVector.hh"
 #include "G4TwoVector.hh"
 #include "G4PVPlacement.hh"
+#include "G4RunManager.hh"
 
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
@@ -34,6 +35,12 @@ public:
 
   Target_Chamber(G4LogicalVolume*, Materials*);
   ~Target_Chamber();
+
+  void setLadderX(G4double val);
+  void setLadderY(G4double val);
+  void setLadderZ(G4double val);
+
+  void UpdatePlacement();
 
   void Construct();
 
@@ -130,6 +137,13 @@ public:
   G4double Wing_Length;
   G4double Wing_Thickness;
 
+  //Target Ladder Holes
+  G4double THole_Radius;
+  G4double THole_Length;
+  
+  G4double TPole_Radius;
+  G4double TPole_Length;
+
   //Ladder Tube
   G4double LTube_Radius;
   G4double LTube_Length;
@@ -224,6 +238,15 @@ public:
   G4ThreeVector Wing_Shift;
   G4RotationMatrix LeftWing_Rot;
   G4RotationMatrix RightWing_Rot;
+
+  //Target Ladder
+  G4ThreeVector TLadder_Shift;
+  G4ThreeVector TPole_Shift;
+  G4ThreeVector TLH1_Shift;
+  G4ThreeVector TLH2_Shift;
+  G4ThreeVector TLH3_Shift;
+  G4ThreeVector TLH4_Shift;
+  G4ThreeVector TLH5_Shift;
 
   //Detector Mounts
   G4ThreeVector L90_Shift;
@@ -327,6 +350,14 @@ public:
   G4LogicalVolume* Wing_log;
   G4VPhysicalVolume* RightWing_phys;
   G4VPhysicalVolume* LeftWing_phys;
+
+  G4LogicalVolume* TLadder_log;
+  G4VPhysicalVolume* TLadder_phys;
+  G4LogicalVolume* TPole_log;
+  G4VPhysicalVolume* TPole_phys;
+  G4AssemblyVolume* TLadderassembly;
+  G4LogicalVolume* TLadderEnvelope_log;
+  G4VPhysicalVolume* TLadderEnvelope_phys;
 
   G4LogicalVolume* Mount_log;
   G4VPhysicalVolume* L90_phys;

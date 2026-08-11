@@ -6,6 +6,7 @@
 #include "G4UImessenger.hh"
 #include "G4UIdirectory.hh"
 #include "G4UIcmdWithoutParameter.hh"
+#include "G4UIcmdWithADoubleAndUnit.hh"
 
 class Target_Chamber_Messenger: public G4UImessenger
 {
@@ -19,8 +20,13 @@ class Target_Chamber_Messenger: public G4UImessenger
     Target_Chamber* Chamber;
    
     G4UIdirectory*             ChamberDir;
+    G4UIdirectory*             TLadderDir;
     G4UIcmdWithoutParameter*   cCmd;
-};
+    G4UIcmdWithADoubleAndUnit* XCmd;
+    G4UIcmdWithADoubleAndUnit* YCmd;
+    G4UIcmdWithADoubleAndUnit* ZCmd;
+
+  };
 
 #endif
 
