@@ -657,6 +657,24 @@ void Target_Chamber::setLadderX(G4double val) { TLadder_Shift.setX(val); UpdateP
 void Target_Chamber::setLadderY(G4double val) { TLadder_Shift.setY(val); UpdatePlacement(); }
 void Target_Chamber::setLadderZ(G4double val) { TLadder_Shift.setZ(val); UpdatePlacement(); }
 
+void Target_Chamber::setHole(G4int val) {
+  if (val == 4){
+    TLadder_Shift.setY(-1.27*cm);
+    UpdatePlacement();
+  }else if (val == 3){
+    TLadder_Shift.setY(-3.81*cm);
+    UpdatePlacement();
+  }else if (val == 2){
+    TLadder_Shift.setY(-6.35*cm);
+    UpdatePlacement();
+  }else if (val == 1){
+    TLadder_Shift.setY(-8.89*cm);
+    UpdatePlacement();
+  }else if (val == 0){
+    TLadder_Shift.setY(-11.43*cm);
+    UpdatePlacement();
+  }
+}
 void Target_Chamber::UpdatePlacement()
 {
     if (TLadderEnvelope_phys) {

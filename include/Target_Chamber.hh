@@ -40,6 +40,8 @@ public:
   void setLadderY(G4double val);
   void setLadderZ(G4double val);
 
+  void setHole(G4int val);
+
   void UpdatePlacement();
 
   void Construct();
