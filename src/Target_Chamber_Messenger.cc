@@ -31,6 +31,11 @@ Target_Chamber_Messenger::Target_Chamber_Messenger(Target_Chamber* C)
   ZCmd->SetGuidance("Set the z position of the bottom right of the ladder");
   ZCmd->SetParameterName("choice",false);
   ZCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  HCmd = new G4UIcmdWithAnInteger("/Chamber/Ladder/setH", this);
+  HCmd->SetGuidance("Set which hole is aligned with the source, numbered 0-4 top to bottom");
+  HCmd->SetParameterName("choice",false);
+  HCmd->AvailableForStates(G4State_PreInit,G4State_Idle);
 }
 
 Target_Chamber_Messenger::~Target_Chamber_Messenger()
@@ -41,6 +46,7 @@ Target_Chamber_Messenger::~Target_Chamber_Messenger()
   delete XCmd;
   delete YCmd;
   delete ZCmd;
+  delete HCmd;
 }
 
 void Target_Chamber_Messenger::SetNewValue(G4UIcommand* command,G4String newValue)
@@ -50,4 +56,5 @@ void Target_Chamber_Messenger::SetNewValue(G4UIcommand* command,G4String newValu
   if (command == XCmd)  { Chamber->setLadderX(XCmd->GetNewDoubleValue(newValue)); }
   if (command == YCmd)  { Chamber->setLadderY(YCmd->GetNewDoubleValue(newValue)); }
   if (command == ZCmd)  { Chamber->setLadderZ(ZCmd->GetNewDoubleValue(newValue)); }
+  if (command == HCmd)  { Chamber->setHole(HCmd->GetNewIntValue(newValue));       }
 }
