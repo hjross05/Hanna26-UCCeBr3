@@ -250,7 +250,9 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   TLH5_Shift.setX(4.5*2.54*cm);
   TLH5_Shift.setY(.55*2.54*cm);
 
-  TPole_Shift.setY(5.225*2.54*cm);
+  TPole_Shift.setX(-.55*2.54*cm);
+  TPole_Shift.setY(7.95*2.54*cm);
+
 
   //Guage Supports
   Horizon_Shift.setX(10.770 * cm);
@@ -567,49 +569,14 @@ void Target_Chamber::Construct()
 
   TPole_log = new G4LogicalVolume(Target_Pole, Steel, "TPole_log");
 
-  G4Material* envMat = expHall_log->GetMaterial();
-  G4Box* TLadderEnvelope_solid = new G4Box("TLadderEnvelope_solid", 10.0*cm, 20.0*cm, 10.0*cm);
-  TLadderEnvelope_log = new G4LogicalVolume(TLadderEnvelope_solid, envMat, "TLadderEnvelope_log");
+  TLadderassembly->AddPlacedVolume(TLadder_log, Hemi_Pos, &CBox_Rot);
+  TLadderassembly->AddPlacedVolume(TPole_log, TPole_Shift, &FDrill_Rot);
 
-  new G4PVPlacement(G4Transform3D(CBox_Rot, G4ThreeVector(0,0,0)), TLadder_log, "TLadder_Local", TLadderEnvelope_log, false, 0);
-  new G4PVPlacement(G4Transform3D(FDrill_Rot, TPole_Shift - TLadder_Shift), TPole_log, "TPole_Local", TLadderEnvelope_log, false, 0);
+  TLadderassembly->MakeImprint(expHall_log, TLadder_Shift, &Rot);
+  
+  
 
-  TLadderEnvelope_phys = new G4PVPlacement(G4Transform3D(Rot, TLadder_Shift), TLadderEnvelope_log, "TLadderEnvelope_phys", expHall_log, false, 0);
-
-  //Vertical Detector Mounts
-  /*std::vector<G4TwoVector> polygon;
-  polygon.push_back(G4TwoVector( 0.00 * 2.54 * cm,  0.00 * 2.54 * cm)); // V1: Bottom-Right
-  polygon.push_back(G4TwoVector( 0.00 * 2.54 * cm,  5.26 * 2.54 * cm)); // V2: Bottom-Left
-  polygon.push_back(G4TwoVector(-2.31 * 2.54 * cm,  7.57 * 2.54 * cm)); // V3: Inner bend
-  polygon.push_back(G4TwoVector(-3.37 * 2.54 * cm,  6.51 * 2.54 * cm)); // V4: Top-Left corner
-  polygon.push_back(G4TwoVector(-1.50 * 2.54 * cm,  4.64 * 2.54 * cm)); // V5: Top-Right corner
-  polygon.push_back(G4TwoVector(-1.50 * 2.54 * cm,  0.00 * 2.54 * cm)); // V6: Outer bend corner
-
-  std::vector<G4ExtrudedSolid::ZSection> zSections;
-  zSections.push_back(G4ExtrudedSolid::ZSection(-2.5 * mm, G4TwoVector(0,0), 1.0));
-  zSections.push_back(G4ExtrudedSolid::ZSection( 2.5 * mm, G4TwoVector(0,0), 1.0));
-
-  G4ExtrudedSolid* rawPlate = new G4ExtrudedSolid("RawPlate", polygon, zSections);
-
-  Mount_log = new G4LogicalVolume(rawPlate, Steel, "Mount_log");
-
-  L90_phys = new G4PVPlacement(G4Transform3D(Rot, L90_Shift), Mount_log, "L90", expHall_log, false, 0);
-  R90_phys = new G4PVPlacement(G4Transform3D(Rot, R90_Shift), Mount_log, "R90", expHall_log, false, 0);
-  L270_phys = new G4PVPlacement(G4Transform3D(M270_Rot, L270_Shift), Mount_log, "L270", expHall_log, false, 0);
-  R270_phys = new G4PVPlacement(G4Transform3D(M270_Rot, R270_Shift), Mount_log, "R270", expHall_log, false, 0);
-  L220_phys = new G4PVPlacement(G4Transform3D(M220_Rot, L220_Shift), Mount_log, "L220", expHall_log, false, 0);
-  R220_phys = new G4PVPlacement(G4Transform3D(M220_Rot, R220_Shift), Mount_log, "R220", expHall_log, false, 0);
-  L142_phys = new G4PVPlacement(G4Transform3D(M142_Rot, L142_Shift), Mount_log, "L142", expHall_log, false, 0);
-  R142_phys = new G4PVPlacement(G4Transform3D(M142_Rot, R142_Shift), Mount_log, "R142", expHall_log, false, 0);*/
-
-
-  /*G4Box* LCradleBox = new G4Box("LCradleBox", LCradleBox_Length, LCradleBox_Width, LCradleBox_Depth);
-  G4Tubs* LCradleHole = new G4Tubs("LCradleHole", 0, LCradleHole_Radius, LCradleHole_Length, 0*deg, 360*deg);
-  G4SubtractionSolid* LCradle = new G4SubtractionSolid("LCradle", LCradleBox, LCradleHole, G4Transform3D(CradleHole_Rot, Pos));
-
-  LargeCradle_log = new G4LogicalVolume(LCradle, plastic, "LargeCradle_log");
-
-  Cradle0_phys = new G4PVPlacement(G4Transform3D(Cradle0_Rot, Cradle0_Shift), LargeCradle_log, "Cradle0", expHall_log, false, 0);*/
+  
 
   //Guage Supports
   /*G4Tubs* Horizon = new G4Tubs("Horizon", 0, Horizon_Radius, Horizon_Length, 0*deg, 360*deg);
@@ -660,7 +627,7 @@ void Target_Chamber::setLadderZ(G4double val) { TLadder_Shift.setZ(val); UpdateP
 void Target_Chamber::setHole(G4int val) {
   if (val == 4){
     TLadder_Shift.setY(-1.27*cm);
-    UpdatePlacement();
+    UpdatePlacement();    
   }else if (val == 3){
     TLadder_Shift.setY(-3.81*cm);
     UpdatePlacement();
@@ -677,8 +644,7 @@ void Target_Chamber::setHole(G4int val) {
 }
 void Target_Chamber::UpdatePlacement()
 {
-    if (TLadderEnvelope_phys) {
-        TLadderEnvelope_phys->SetTranslation(TLadder_Shift);
-        G4RunManager::GetRunManager()->GeometryHasBeenModified();
-    }
+  TLadderassembly->MakeImprint(expHall_log, TLadder_Shift, &Rot);
+  G4RunManager::GetRunManager()->GeometryHasBeenModified();
 }
+

@@ -1,5 +1,6 @@
 /CeBr3/GeometryFile FSU_55FeDPG.geo
 
+/Chamber/Ladder/setH 2
 /Chamber/Construct
 
 /Brick/GeometryFile bricks.geo
@@ -11,7 +12,7 @@
 /Source/Capsule/setZ -2.78 mm
 /Source/Capsule/Construct
 
-/Chamber/Ladder/setH 2
+
 
 # Initialize run manager =======================================================
 /run/initialize

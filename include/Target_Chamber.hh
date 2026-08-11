@@ -16,6 +16,7 @@
 #include "G4TwoVector.hh"
 #include "G4PVPlacement.hh"
 #include "G4RunManager.hh"
+#include "G4AssemblyVolume.hh"
 
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
