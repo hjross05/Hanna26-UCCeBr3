@@ -10,6 +10,9 @@
 
 /Source/Capsule/Construct
 
+/Chamber/Ladder/setX 1.397 cm
+/Chamber/Ladder/setY -6.35 cm
+
 # Initialize run manager =======================================================
 /run/initialize
 

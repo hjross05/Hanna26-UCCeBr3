@@ -20,6 +20,8 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   Al = materials->FindMaterial("Al");
   quartz = materials->FindMaterial("quartz");
 
+  TLadderassembly = new G4AssemblyVolume();
+
 
   //Spherical Target Chamber
   /*Radius    = 4.05*2.54*cm;
@@ -110,6 +112,14 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   Wing_Radius = 10*2.54*cm;
   Wing_Length = .19*2.54*cm;
   Wing_Thickness = 4.5*2.54*cm;
+
+  //Target Ladder Holes
+  THole_Radius = .25*2.54*cm;
+  THole_Length = .9525*2.54*cm;
+
+  //Target Ladder Pole
+  TPole_Radius = .25*2.54*cm;
+  TPole_Length = 2.5*2.54*cm;
 
   //Ladder Tube
   LTube_Radius = 2.6289 * cm;
@@ -220,7 +230,27 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   //Wings
   Wing_Shift.setY(-2.41*2.54*cm);
 
-  
+  //Target Ladder
+  TLadder_Shift.setX(.55*2.54*cm);
+  TLadder_Shift.setY(-2.725*2.54*cm);
+  TLadder_Shift.setZ(2.78*mm);
+
+  TLH1_Shift.setX(.5*2.54*cm);
+  TLH1_Shift.setY(.55*2.54*cm);
+
+  TLH2_Shift.setX(1.5*2.54*cm);
+  TLH2_Shift.setY(.55*2.54*cm);
+
+  TLH3_Shift.setX(2.5*2.54*cm);
+  TLH3_Shift.setY(.55*2.54*cm);
+
+  TLH4_Shift.setX(3.5*2.54*cm);
+  TLH4_Shift.setY(.55*2.54*cm);
+
+  TLH5_Shift.setX(4.5*2.54*cm);
+  TLH5_Shift.setY(.55*2.54*cm);
+
+  TPole_Shift.setY(5.225*2.54*cm);
 
   //Guage Supports
   Horizon_Shift.setX(10.770 * cm);
@@ -505,6 +535,47 @@ void Target_Chamber::Construct()
   RightWing_phys = new G4PVPlacement(G4Transform3D(RightWing_Rot, Wing_Shift), Wing_log, "RightWing", expHall_log, false, 0);
 
 
+  //Target Ladder
+  std::vector<G4TwoVector> TLPlate;
+  TLPlate.push_back(G4TwoVector(0.00 * 2.54 * cm, 0.00 * 2.54 * cm)); // Bottom Left
+  TLPlate.push_back(G4TwoVector(0.00 * 2.54 * cm, 1.10 * 2.54 * cm)); // Bottom Right
+  TLPlate.push_back(G4TwoVector(5.00 * 2.54 * cm, 1.10 * 2.54 * cm)); // Right Outside Corner
+  TLPlate.push_back(G4TwoVector(5.00 * 2.54 * cm, 0.779 * 2.54 * cm)); // Right Inside Corner
+  TLPlate.push_back(G4TwoVector(5.45 * 2.54 * cm, 0.779 * 2.54 * cm)); // Top Right
+  TLPlate.push_back(G4TwoVector(5.45 * 2.54 * cm, 0.321 * 2.54 * cm)); // Top Left
+  TLPlate.push_back(G4TwoVector(5.00 * 2.54 * cm, 0.321 * 2.54 * cm)); // Left Inside Corner
+  TLPlate.push_back(G4TwoVector(5.00 * 2.54 * cm, 0.00 * 2.54 * cm)); // Left Outside Corner
+
+  std::vector<G4ExtrudedSolid::ZSection> TLzSections;
+  TLzSections.push_back(G4ExtrudedSolid::ZSection( 0 * mm, G4TwoVector(0,0), 1.0));
+  TLzSections.push_back(G4ExtrudedSolid::ZSection( 1.905 * mm, G4TwoVector(0,0), 1.0));
+
+  G4ExtrudedSolid* TLadder = new G4ExtrudedSolid("TLadder", TLPlate, TLzSections);
+  G4Tubs* THole = new G4Tubs("THole", 0, THole_Radius, THole_Length, 0*deg, 360*deg);
+  G4SubtractionSolid* TLH1 = new G4SubtractionSolid("TLH1", TLadder, THole, G4Transform3D(Rot, TLH1_Shift));
+  G4SubtractionSolid* TLH2 = new G4SubtractionSolid("TLH2", TLH1, THole, G4Transform3D(Rot, TLH2_Shift));
+  G4SubtractionSolid* TLH3 = new G4SubtractionSolid("TLH3", TLH2, THole, G4Transform3D(Rot, TLH3_Shift));
+  G4SubtractionSolid* TLH4 = new G4SubtractionSolid("TLH4", TLH3, THole, G4Transform3D(Rot, TLH4_Shift));
+  G4SubtractionSolid* TLH5 = new G4SubtractionSolid("TLH5", TLH4, THole, G4Transform3D(Rot, TLH5_Shift));
+
+
+  TLadder_log = new G4LogicalVolume(TLH5, Al, "TLadder_log");
+
+  //TLadder_phys = new G4PVPlacement(G4Transform3D(CBox_Rot, TLadder_Shift), TLadder_log, "Target_Ladder", expHall_log, false, 0);
+
+  G4Tubs* Target_Pole = new G4Tubs("Target_Pole", 0, THole_Radius, TPole_Length, 0*deg, 360*deg);
+
+  TPole_log = new G4LogicalVolume(Target_Pole, Steel, "TPole_log");
+
+  G4Material* envMat = expHall_log->GetMaterial();
+  G4Box* TLadderEnvelope_solid = new G4Box("TLadderEnvelope_solid", 10.0*cm, 20.0*cm, 10.0*cm);
+  TLadderEnvelope_log = new G4LogicalVolume(TLadderEnvelope_solid, envMat, "TLadderEnvelope_log");
+
+  new G4PVPlacement(G4Transform3D(CBox_Rot, G4ThreeVector(0,0,0)), TLadder_log, "TLadder_Local", TLadderEnvelope_log, false, 0);
+  new G4PVPlacement(G4Transform3D(FDrill_Rot, TPole_Shift - TLadder_Shift), TPole_log, "TPole_Local", TLadderEnvelope_log, false, 0);
+
+  TLadderEnvelope_phys = new G4PVPlacement(G4Transform3D(Rot, TLadder_Shift), TLadderEnvelope_log, "TLadderEnvelope_phys", expHall_log, false, 0);
+
   //Vertical Detector Mounts
   /*std::vector<G4TwoVector> polygon;
   polygon.push_back(G4TwoVector( 0.00 * 2.54 * cm,  0.00 * 2.54 * cm)); // V1: Bottom-Right
@@ -581,4 +652,15 @@ void Target_Chamber::Construct()
   //Both_log->SetVisAttributes(Vis);
 
   return; 
+}
+void Target_Chamber::setLadderX(G4double val) { TLadder_Shift.setX(val); UpdatePlacement(); }
+void Target_Chamber::setLadderY(G4double val) { TLadder_Shift.setY(val); UpdatePlacement(); }
+void Target_Chamber::setLadderZ(G4double val) { TLadder_Shift.setZ(val); UpdatePlacement(); }
+
+void Target_Chamber::UpdatePlacement()
+{
+    if (TLadderEnvelope_phys) {
+        TLadderEnvelope_phys->SetTranslation(TLadder_Shift);
+        G4RunManager::GetRunManager()->GeometryHasBeenModified();
+    }
 }
