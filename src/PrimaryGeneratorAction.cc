@@ -3,7 +3,7 @@
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction *detector): myDetector(detector)
 {
   sourcePosition.setX(0);
-  sourcePosition.setY(2.54*.1875/2.*cm); // Half capsule depth
+  sourcePosition.setY(0);
   sourcePosition.setZ(0);
   simpleSourceEnergy = 0;
   muonSourceEnergy = 0;
