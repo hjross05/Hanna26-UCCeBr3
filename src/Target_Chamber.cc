@@ -233,7 +233,7 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   //Target Ladder
   TLadder_Shift.setX(.55*2.54*cm);
   TLadder_Shift.setY(-2.725*2.54*cm);
-  TLadder_Shift.setZ(.9525*mm);
+  TLadder_Shift.setZ(0);
 
   TLH1_Shift.setX(.5*2.54*cm);
   TLH1_Shift.setY(.55*2.54*cm);

@@ -8,6 +8,7 @@
 /Mount/GeometryFile Mounts.geo
 /Mount/Construct
 
+/Source/Capsule/setZ -2.78 mm
 /Source/Capsule/Construct
 
 /Chamber/Ladder/setH 2
