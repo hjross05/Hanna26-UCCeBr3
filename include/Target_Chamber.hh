@@ -98,7 +98,7 @@ public:
   G4double RInner[NumZPlanes];
   G4double ROuter[NumZPlanes];
 
-  static const G4int WNumZPlanes = 3;
+  static const G4int WNumZPlanes = 5;
   G4double WZPlane[WNumZPlanes];
   G4double WRInner[WNumZPlanes];
   G4double WROuter[WNumZPlanes];
@@ -107,6 +107,10 @@ public:
   G4double FDrill_Radius;
   G4double FDrill_Length;
   G4double FDrill_Thickness;
+
+  G4double WDrill_Radius;
+  G4double WDrill_Length;
+  G4double WDrill_Thickness;
 
   //KF50 Clamp
   static const G4int NumCPlanes = 6; 
@@ -207,8 +211,8 @@ public:
 
   G4ThreeVector Window_Shift;
 
-  G4ThreeVector LKF50_Shift;
-  G4RotationMatrix LKF50_Rot;
+  G4ThreeVector LKF40_Shift;
+  G4RotationMatrix LKF40_Rot;
 
   G4ThreeVector GateValve_Shift;
   G4ThreeVector ValveCap_Shift;
@@ -235,8 +239,8 @@ public:
 
   G4ThreeVector Base_Shift;
 
-  G4ThreeVector LBKF50_Shift;
-  G4RotationMatrix LBKF50_Rot;
+  G4ThreeVector LBKF40_Shift;
+  G4RotationMatrix LBKF40_Rot;
 
   G4ThreeVector Wing_Shift;
   G4RotationMatrix LeftWing_Rot;
@@ -317,10 +321,11 @@ public:
 
   G4LogicalVolume* KF50_log;
   G4VPhysicalVolume* KF50_phys;
-  G4LogicalVolume* longKF50_log;
-  G4VPhysicalVolume* LKF50_phys;
-  G4LogicalVolume* shortKF50_log;
-
+  G4LogicalVolume* longKF40_log;
+  G4VPhysicalVolume* LKF40_phys;
+  G4LogicalVolume* shortKF40_log;
+  G4VPhysicalVolume* LBKF40_phys;
+  G4VPhysicalVolume* WindowClamp_phys;
   G4LogicalVolume* Window_log;
   G4VPhysicalVolume* Window_phys;
 
@@ -348,7 +353,6 @@ public:
   G4LogicalVolume* Base_log;
   G4VPhysicalVolume* Base_phys;
 
-  G4VPhysicalVolume* LBKF50_phys;
 
   G4LogicalVolume* Wing_log;
   G4VPhysicalVolume* RightWing_phys;
