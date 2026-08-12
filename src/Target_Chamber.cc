@@ -34,12 +34,12 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
 
   //Hemispherical Target Chamber
   Hemi_Radius    = 4.0*2.54*cm;
-  Hemi_Thickness = .2*2.54*cm;
+  Hemi_Thickness = .2*2.54*cm; 
 
   //Cylinder on target chamber
-  Mid_Radius = 4.05*2.54*cm;
+  Mid_Radius = 4.05*2.54*cm; 
   Mid_Thickness = .2*2.54*cm;
-  Mid_Length = 1 * 2.54 *cm + 2*mm;
+  Mid_Length = 2.64 *cm;
 
   //Wider ring attaced to mid
   Ring_Radius = 5*2.54*cm;
@@ -69,12 +69,12 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   //KF50 Flange Hole
   FDrill_Radius = 2.6289 * cm;
   FDrill_Length = 15 * cm; 
-  FDrill_Thickness = .2*2.54*cm;
+  
 
   //KF40 Flange Hole
-  WDrill_Radius = 2.1995 * cm;
+  WDrill_Radius = 2.1995 * cm; //2.1995
   WDrill_Length = 15 * cm; 
-  WDrill_Thickness = .2*2.54*cm;
+
 
   //Gate Valve
   GateValve_Length = 68.85*mm;
@@ -312,10 +312,10 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   KF50_Rot.rotateX(90*deg);
 
   FDrill_Rot = G4RotationMatrix::IDENTITY;
-  FDrill_Rot.rotateX(90.01*deg); //90.01 instead of 90 so the drill shows across the union
+  FDrill_Rot.rotateX(90.3*deg); //90.3 instead of 90 so the drill shows across the union
 
   LKF40_Rot = G4RotationMatrix::IDENTITY;
-  LKF40_Rot.rotateY(-90.01*deg);
+  LKF40_Rot.rotateY(-90.3*deg);
 
   //Gate Valve
   GDrill_Rot = G4RotationMatrix::IDENTITY;
