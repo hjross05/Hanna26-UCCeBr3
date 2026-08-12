@@ -58,18 +58,23 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
 
   //Long KF50 Flange for Window
   ZPlane[0] = 0.00 * cm;   ZPlane[1] = 0.254 * cm;  ZPlane[2] = 0.3048 * cm; ZPlane[3] = 0.508 * cm;  ZPlane[4] = 1.905 * cm;  ZPlane[5] = 4.445 * cm;
-  RInner[0] = 2.6289 * cm; RInner[1] = 2.6289 * cm; RInner[2] = 2.3114 * cm; RInner[3] = 2.3114 * cm; RInner[4] = 2.3114 * cm; RInner[5] = 2.3114 * cm;
-  ROuter[0] = 3.7465 * cm; ROuter[1] = 3.7465 * cm; ROuter[2] = 3.7465 * cm; ROuter[3] = 2.6289 * cm; ROuter[4] = 2.6289 * cm; ROuter[5] = 2.6289 * cm;
+  RInner[0] = 2.3882 * cm; RInner[1] = 2.3882 * cm; RInner[2] = 2.0955 * cm; RInner[3] = 2.0955 * cm; RInner[4] = 2.0955 * cm; RInner[5] = 2.0955 * cm;
+  ROuter[0] = 2.7432 * cm; ROuter[1] = 2.7432 * cm; ROuter[2] = 2.7432 * cm; ROuter[3] = 2.1955 * cm; ROuter[4] = 2.1955 * cm; ROuter[5] = 2.1955 * cm;
 
   //Short KF50 Window
-  WZPlane[0] = 0.00 * cm;   WZPlane[1] = 0.254 * cm;  WZPlane[2] = 0.3048 * cm;
-  WRInner[0] = 2.6289 * cm; WRInner[1] = 2.6289 * cm; WRInner[2] = 2.3114 * cm;
-  WROuter[0] = 3.7465 * cm; WROuter[1] = 3.7465 * cm; WROuter[2] = 3.7465 * cm;
+  WZPlane[0] = 0.00 * cm;   WZPlane[1] = 0.254 * cm;  WZPlane[2] = 0.3048 * cm; WZPlane[3] = 0.5809 * cm; WZPlane[4] = 0.8382 * cm;
+  WRInner[0] = 2.3882 * cm; WRInner[1] = 2.3882 * cm; WRInner[2] = 2.0955 * cm; WRInner[3] = 2.0955 * cm; WRInner[4] = 2.0955 * cm;
+  WROuter[0] = 2.7432 * cm; WROuter[1] = 2.7432 * cm; WROuter[2] = 2.7432 * cm; WROuter[3] = 2.1955 * cm; WROuter[4] = 2.1955 * cm;
 
   //KF50 Flange Hole
   FDrill_Radius = 2.6289 * cm;
   FDrill_Length = 15 * cm; 
   FDrill_Thickness = .2*2.54*cm;
+
+  //KF40 Flange Hole
+  WDrill_Radius = 2.1995 * cm;
+  WDrill_Length = 15 * cm; 
+  WDrill_Thickness = .2*2.54*cm;
 
   //Gate Valve
   GateValve_Length = 68.85*mm;
@@ -92,7 +97,7 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   CBox_Depth = 7.75 * mm;
 
   //KF40 Clamp on Beam Pipe
-  C40Plane[0] = 0.00 * mm; C40Plane[1] = 5.5 * mm; C40Plane[2] = 5.5 * mm; C40Plane[3] = 16.5 * mm; C40Plane[4] = 16.5 * mm; C40Plane[5] = 22 * mm;
+  C40Plane[0] = 0.00 * mm; C40Plane[1] = 3.5 * mm; C40Plane[2] = 3.5 * mm; C40Plane[3] = 10.5 * mm; C40Plane[4] = 10.5 * mm; C40Plane[5] = 14 * mm;
   C40Inner[0] = 26 * mm; C40Inner[1] = 26 * mm; C40Inner[2] = 31 * mm; C40Inner[3] = 31 * mm; C40Inner[4] = 26 * mm; C40Inner[5] = 26 * mm;
   C40Outer[0] = 37 * mm; C40Outer[1] = 37 * mm; C40Outer[2] = 37 * mm; C40Outer[3] = 37 * mm; C40Outer[4] = 37 * mm; C40Outer[5] = 37 * mm;
 
@@ -142,8 +147,8 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   KF25C_Thickness = .5*2.54*cm;
   
   //Glass Window
-  Window_Radius = 2.6289 * cm;
-  Window_Length = .2*2.54*cm;
+  Window_Radius = 2 * cm;
+  Window_Length = .06*2.54*cm;
   
 
 
@@ -173,16 +178,16 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   KF50_Shift.setZ(0);
 
   //Glass Window
-  Window_Shift.setX(10.16*cm);
+  Window_Shift.setX(14.9*cm);
 
   //Flange for glass port
-  LKF50_Shift.setX(14.327*cm);
-  LKF50_Shift.setY(0);
-  LKF50_Shift.setZ(0*cm);
+  LKF40_Shift.setX(14.327*cm);
+  LKF40_Shift.setY(0);
+  LKF40_Shift.setZ(0*cm);
 
   //Opp Flange Glass Port
-  LBKF50_Shift.setX(14.7*cm);
-  LBKF50_Shift.setZ(0*cm);
+  LBKF40_Shift.setX(14.4*cm);
+  LBKF40_Shift.setZ(0*cm);
 
   //Hole on top of chamber
   FDrill_Shift.setX(0);
@@ -211,9 +216,9 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   BPClamp_Shift.setZ(-8.035*2.54*cm - 11*mm);
   
   R40CBox_Shift.setX(45*mm);
-  R40CBox_Shift.setZ(11*mm);
+  R40CBox_Shift.setZ(7*mm);
   L40CBox_Shift.setX(-45*mm);
-  L40CBox_Shift.setZ(11*mm);
+  L40CBox_Shift.setZ(7*mm);
 
   //Ladder Tube
   LTube_Shift.setY(28.18*cm);
@@ -309,8 +314,8 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   FDrill_Rot = G4RotationMatrix::IDENTITY;
   FDrill_Rot.rotateX(90.01*deg); //90.01 instead of 90 so the drill shows across the union
 
-  LKF50_Rot = G4RotationMatrix::IDENTITY;
-  LKF50_Rot.rotateY(-90.01*deg);
+  LKF40_Rot = G4RotationMatrix::IDENTITY;
+  LKF40_Rot.rotateY(-90.01*deg);
 
   //Gate Valve
   GDrill_Rot = G4RotationMatrix::IDENTITY;
@@ -336,8 +341,8 @@ Target_Chamber::Target_Chamber(G4LogicalVolume* experimentalHall_log,
   CBox_Rot.rotateZ(90*deg);
 
   //Opp Flange Glass Port
-  LBKF50_Rot = G4RotationMatrix::IDENTITY;
-  LBKF50_Rot.rotateY(-270*deg);
+  LBKF40_Rot = G4RotationMatrix::IDENTITY;
+  LBKF40_Rot.rotateY(-270*deg);
 
   //Wings
   LeftWing_Rot = G4RotationMatrix::IDENTITY;
@@ -415,6 +420,7 @@ void Target_Chamber::Construct()
   Bowl_phys = new G4PVPlacement(G4Transform3D(Rot, Hemi_Pos), Bowl_log, "Bowl", expHall_log, false, 0);*/
 
   G4Tubs* FDrill = new G4Tubs("FDrill", 0, FDrill_Radius, FDrill_Length, 0*deg, 360*deg);
+  G4Tubs* WDrill = new G4Tubs("WDrill", 0, WDrill_Radius, WDrill_Length, 0*deg, 360*deg);
   //FDrill_log = new G4LogicalVolume(FDrill, Steel, "FDrill_log");
   G4Tubs* LTube = new G4Tubs("LTube", LTube_Radius-LTube_Thickness, LTube_Radius, LTube_Length, 0*deg, 360*deg);
   LTube_log = new G4LogicalVolume(LTube, Steel, "LTube_log");
@@ -423,7 +429,7 @@ void Target_Chamber::Construct()
 
   G4SubtractionSolid* Top = new G4SubtractionSolid("Top", Bowl, FDrill, G4Transform3D(FDrill_Rot, FDrill_Shift));
 
-  G4SubtractionSolid* Both = new G4SubtractionSolid("Both", Top, FDrill, G4Transform3D(LKF50_Rot, LKF50_Shift));
+  G4SubtractionSolid* Both = new G4SubtractionSolid("Both", Top, WDrill, G4Transform3D(LKF40_Rot, LKF40_Shift));
 
   Both_log = new G4LogicalVolume(Both, Al, "Both_log");
 
@@ -453,9 +459,9 @@ void Target_Chamber::Construct()
 
   KF50_log = new G4LogicalVolume(solidKF50, Steel, "KF50_log");
 
-  G4Polycone* longKF50 = new G4Polycone("longKF50", 0.0*deg, 360.0*deg, NumZPlanes, ZPlane, RInner, ROuter);
+  G4Polycone* longKF40 = new G4Polycone("longKF40", 0.0*deg, 360.0*deg, NumZPlanes, ZPlane, RInner, ROuter);
 
-  longKF50_log = new G4LogicalVolume(longKF50, Steel, "longKF50_log");
+  longKF40_log = new G4LogicalVolume(longKF40, Steel, "longKF40_log");
 
   //Flange on top of chamber
   KF50_phys = new G4PVPlacement(G4Transform3D(KF50_Rot, KF50_Shift),
@@ -463,19 +469,20 @@ void Target_Chamber::Construct()
                                   expHall_log, false, 0);
 
   //Glass Port Flanges                                
-  LKF50_phys = new G4PVPlacement(G4Transform3D(LKF50_Rot, LKF50_Shift), longKF50_log, "LKF50", expHall_log, false, 0);
+  LKF40_phys = new G4PVPlacement(G4Transform3D(LKF40_Rot, LKF40_Shift), longKF40_log, "LKF40", expHall_log, false, 0);
 
-  G4Polycone* shortKF50 = new G4Polycone("shortKF50", 0.0*deg, 360.0*deg, WNumZPlanes, WZPlane, WRInner, WROuter);
+  G4Polycone* shortKF40 = new G4Polycone("shortKF40", 0.0*deg, 360.0*deg, WNumZPlanes, WZPlane, WRInner, WROuter);
 
-  shortKF50_log = new G4LogicalVolume(shortKF50, Steel, "shortKF50_log");
-  LBKF50_phys = new G4PVPlacement(G4Transform3D(LBKF50_Rot, LBKF50_Shift), shortKF50_log, "LBKF50", expHall_log, false, 0);
+  shortKF40_log = new G4LogicalVolume(shortKF40, Steel, "shortKF40_log");
+  LBKF40_phys = new G4PVPlacement(G4Transform3D(LBKF40_Rot, LBKF40_Shift), shortKF40_log, "LBKF40", expHall_log, false, 0);
 
   //Glass Window
   G4Tubs* Window = new G4Tubs("Window",0*mm, Window_Radius, Window_Length, 0*deg, 360*deg);
 
   Window_log = new G4LogicalVolume(Window, quartz, "Window_log");
 
-  Window_phys = new G4PVPlacement(G4Transform3D(LKF50_Rot, LBKF50_Shift), Window_log, "Window", expHall_log, false, 0);
+  Window_phys = new G4PVPlacement(G4Transform3D(LKF40_Rot, Window_Shift), Window_log, "Window", expHall_log, false, 0);
+
   
   //Gate Valve
   G4Box* GateBox = new G4Box("GateBox", GateValve_Length, GateValve_Width, GateValve_Depth);
@@ -506,6 +513,8 @@ void Target_Chamber::Construct()
   Clamp40_log = new G4LogicalVolume(Clamp40, Al, "Clamp40_log");
 
   BPClamp_phys = new G4PVPlacement(G4Transform3D(Rot, BPClamp_Shift), Clamp40_log, "BPClamp", expHall_log, false, 0);
+
+  WindowClamp_phys = new G4PVPlacement(G4Transform3D(LKF40_Rot, LBKF40_Shift + G4ThreeVector(7*mm, 0, 0)), Clamp40_log, "Window_Clamp", expHall_log, false, 0);
 
   //Support Pipe
   G4Tubs* Support = new G4Tubs("Support", 0, Support_Radius, Support_Length, 0*deg, 360*deg);
