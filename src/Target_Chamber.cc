@@ -1,9 +1,6 @@
 /* H. J. Ross 7/10/2026
    This model includes all peices of the CeBrA array that we deemed 
-   necessary to simulate as of Summer 2026. We have determined
-   that the gas handling cross connected to the target ladder
-   extension above the gate valve can safely be omitted.
-   The code for it is still here if that changes. In order to get rid
+   necessary to simulate as of Summer 2026. In order to get rid
    of a peice of the model, comment out its G4PVPlacement() call. Some
    of the peices here are rudementary and do not fully represent what
    the dead material is in real life but we have determined that the
@@ -585,10 +582,8 @@ void Target_Chamber::Construct()
   
   
 
-  
-
   //Guage Supports
-  /*G4Tubs* Horizon = new G4Tubs("Horizon", 0, Horizon_Radius, Horizon_Length, 0*deg, 360*deg);
+  G4Tubs* Horizon = new G4Tubs("Horizon", 0, Horizon_Radius, Horizon_Length, 0*deg, 360*deg);
   Horizon_log = new G4LogicalVolume(Horizon, Steel, "Horizon_log");
   Horizon_phys = new G4PVPlacement(G4Transform3D(Horizon_Rot, Horizon_Shift), Horizon_log, "Horizon", expHall_log, false, 0);
 
@@ -607,7 +602,7 @@ void Target_Chamber::Construct()
   TKF25C_phys = new G4PVPlacement(G4Transform3D(Clamp_Rot, TKF25C_Shift), KF25C_log, "TKF25C", expHall_log, false, 0); 
   BUKF25C_phys = new G4PVPlacement(G4Transform3D(Clamp_Rot, BUKF25C_Shift), KF25C_log, "BUKF25C", expHall_log, false, 0); 
   BLKF25C_phys = new G4PVPlacement(G4Transform3D(Clamp_Rot, BLKF25C_Shift), KF25C_log, "BLKF25C", expHall_log, false, 0); 
-  LDKF25C_phys = new G4PVPlacement(G4Transform3D(Clamp_Rot, LDKF25C_Shift), KF25C_log, "LDKF25C", expHall_log, false, 0); */
+  LDKF25C_phys = new G4PVPlacement(G4Transform3D(Clamp_Rot, LDKF25C_Shift), KF25C_log, "LDKF25C", expHall_log, false, 0); 
 
 
 
