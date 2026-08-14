@@ -6,7 +6,7 @@
 /Brick/GeometryFile bricks.geo
 /Brick/Construct 
 
-/Mount/GeometryFile Mounts.geo
+/Mount/GeometryFile mounts.geo
 /Mount/Construct
 
 /Source/Capsule/setZ -2.78 mm
